@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ReactQueryProvider } from "@/components/providers/react-query-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 import { APP_NAME, APP_DESCRIPTION } from "@/lib/constants"
 
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           <ReactQueryProvider>{children}</ReactQueryProvider>
+          <Toaster richColors position="top-right" />
         </ThemeProvider>
       </body>
     </html>

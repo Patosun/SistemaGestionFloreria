@@ -22,9 +22,10 @@ import { APP_NAME } from "@/lib/constants"
 const NAV_ITEMS = [
   { href: "/admin/dashboard",   label: "Dashboard",      icon: LayoutDashboard },
   { href: "/admin/products",    label: "Productos",      icon: Package },
+  { href: "/admin/categories",  label: "Categorías",     icon: ClipboardList },
+  { href: "/admin/suppliers",   label: "Proveedores",    icon: Truck },
   { href: "/admin/inventory",   label: "Inventario",     icon: FlowerIcon },
   { href: "/admin/orders",      label: "Pedidos",        icon: ShoppingCart },
-  { href: "/admin/production",  label: "Producción",     icon: ClipboardList },
   { href: "/admin/calendar",    label: "Calendario",     icon: CalendarDays },
   { href: "/admin/delivery",    label: "Entregas",       icon: Truck },
   { href: "/admin/customers",   label: "Clientes",       icon: Users },
