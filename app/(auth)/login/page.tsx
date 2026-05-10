@@ -7,7 +7,7 @@ import { loginSchema } from "@/lib/validators"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { APP_NAME } from "@/lib/constants"
+import Image from "next/image"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -44,9 +44,9 @@ export default function LoginPage() {
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-2xl font-heading font-semibold tracking-tight">{APP_NAME}</h1>
-        <p className="text-muted-foreground text-sm mt-1">Inicia sesión en tu cuenta</p>
+      <div className="flex flex-col items-center gap-3">
+        <Image src="/assets/Logo.png" alt="Alesli" width={160} height={80} className="object-contain" priority />
+        <p className="text-muted-foreground text-sm">Inicia sesión en tu cuenta</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

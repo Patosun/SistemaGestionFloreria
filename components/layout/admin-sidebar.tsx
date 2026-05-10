@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
@@ -17,7 +18,6 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ADMIN_ROLES } from "@/lib/constants"
-import { APP_NAME } from "@/lib/constants"
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard",   label: "Dashboard",      icon: LayoutDashboard },
@@ -45,8 +45,8 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
   return (
     <aside className="flex w-60 flex-col border-r bg-sidebar">
       {/* Logo */}
-      <div className="flex h-14 items-center border-b px-4">
-        <span className="font-heading font-semibold text-sidebar-foreground">{APP_NAME}</span>
+      <div className="flex h-14 items-center justify-center border-b px-4">
+        <Image src="/assets/Logo.png" alt="Alesli" width={120} height={40} className="object-contain" priority />
       </div>
 
       {/* Nav */}

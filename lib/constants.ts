@@ -1,6 +1,6 @@
 // ─── App ───────────────────────────────────────────────────────────────────
 
-export const APP_NAME = "Florería Pro"
+export const APP_NAME = "Alesli"
 export const APP_DESCRIPTION = "Sistema ERP integral para floristerías"
 
 // ─── Auth / Roles ──────────────────────────────────────────────────────────
