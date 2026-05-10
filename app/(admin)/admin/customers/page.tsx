@@ -1,0 +1,402 @@
+"use client"
+
+import { useState } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+import { Plus, Pencil, Trash2, Search, Building2, User } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
+import { z } from "zod"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table"
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+} from "@/components/ui/form"
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
+
+type Customer = {
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  address: string | null
+  notes: string | null
+  isB2B: boolean
+  companyName: string | null
+  taxId: string | null
+  creditLimit: number | null
+  totalSpent: number
+  orderCount: number
+  createdAt: string
+}
+
+const schema = z.object({
+  name: z.string().min(1, "Nombre requerido"),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  phone: z.string().max(30).optional().or(z.literal("")),
+  address: z.string().optional().or(z.literal("")),
+  notes: z.string().optional().or(z.literal("")),
+  isB2B: z.enum(["true", "false"]),
+  companyName: z.string().optional().or(z.literal("")),
+  taxId: z.string().optional().or(z.literal("")),
+  creditLimit: z.number().positive().optional().nullable(),
+})
+
+type FormValues = z.infer<typeof schema>
+
+async function fetchCustomers(q: string): Promise<{ data: Customer[] }> {
+  const params = new URLSearchParams({ limit: "100" })
+  if (q) params.set("q", q)
+  const res = await fetch(`/api/v1/customers?${params}`)
+  if (!res.ok) throw new Error("Error al cargar clientes")
+  return res.json()
+}
+
+export default function CustomersPage() {
+  const [q, setQ] = useState("")
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editCustomer, setEditCustomer] = useState<Customer | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const qc = useQueryClient()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["customers", q],
+    queryFn: () => fetchCustomers(q),
+  })
+  const customers = data?.data ?? []
+
+  const form = useForm<FormValues>({
+    resolver: standardSchemaResolver(schema),
+    defaultValues: {
+      name: "", email: "", phone: "", address: "", notes: "",
+      isB2B: "false", companyName: "", taxId: "", creditLimit: undefined,
+    },
+  })
+
+  function openCreate() {
+    setEditCustomer(null)
+    form.reset({
+      name: "", email: "", phone: "", address: "", notes: "",
+      isB2B: "false", companyName: "", taxId: "", creditLimit: undefined,
+    })
+    setDialogOpen(true)
+  }
+
+  function openEdit(c: Customer) {
+    setEditCustomer(c)
+    form.reset({
+      name: c.name,
+      email: c.email ?? "",
+      phone: c.phone ?? "",
+      address: c.address ?? "",
+      notes: c.notes ?? "",
+      isB2B: c.isB2B ? "true" : "false",
+      companyName: c.companyName ?? "",
+      taxId: c.taxId ?? "",
+      creditLimit: c.creditLimit ?? undefined,
+    })
+    setDialogOpen(true)
+  }
+
+  const saveMutation = useMutation({
+    mutationFn: async (values: FormValues) => {
+      const payload = {
+        name: values.name,
+        email: values.email || undefined,
+        phone: values.phone || undefined,
+        address: values.address || undefined,
+        notes: values.notes || undefined,
+        isB2B: values.isB2B === "true",
+        companyName: values.companyName || undefined,
+        taxId: values.taxId || undefined,
+        creditLimit: values.creditLimit ?? undefined,
+      }
+      const url = editCustomer ? `/api/v1/customers/${editCustomer.id}` : "/api/v1/customers"
+      const method = editCustomer ? "PUT" : "POST"
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? "Error al guardar")
+      return json
+    },
+    onSuccess: () => {
+      toast.success(editCustomer ? "Cliente actualizado" : "Cliente creado")
+      setDialogOpen(false)
+      qc.invalidateQueries({ queryKey: ["customers"] })
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/v1/customers/${id}`, { method: "DELETE" })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? "Error al eliminar")
+    },
+    onSuccess: () => {
+      toast.success("Cliente eliminado")
+      setDeleteId(null)
+      qc.invalidateQueries({ queryKey: ["customers"] })
+    },
+    onError: (e: Error) => {
+      toast.error(e.message)
+      setDeleteId(null)
+    },
+  })
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Clientes</h1>
+          <p className="text-sm text-muted-foreground">Gestiona tu cartera de clientes</p>
+        </div>
+        <Button onClick={openCreate}>
+          <Plus className="mr-2 h-4 w-4" /> Nuevo cliente
+        </Button>
+      </div>
+
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          className="pl-9"
+          placeholder="Buscar nombre, email, teléfono…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Contacto</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead className="text-right">Pedidos</TableHead>
+              <TableHead className="text-right">Total gastado</TableHead>
+              <TableHead />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                  ))}
+                  <TableCell />
+                </TableRow>
+              ))
+            ) : customers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  No hay clientes{q ? " con esa búsqueda" : ""}
+                </TableCell>
+              </TableRow>
+            ) : (
+              customers.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {c.isB2B
+                        ? <Building2 className="h-4 w-4 text-muted-foreground" />
+                        : <User className="h-4 w-4 text-muted-foreground" />}
+                      <div>
+                        <p className="font-medium">{c.name}</p>
+                        {c.companyName && (
+                          <p className="text-xs text-muted-foreground">{c.companyName}</p>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {c.email && <p>{c.email}</p>}
+                      {c.phone && <p className="text-muted-foreground">{c.phone}</p>}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {c.isB2B
+                      ? <Badge variant="secondary">B2B</Badge>
+                      : <Badge variant="outline">Minorista</Badge>}
+                  </TableCell>
+                  <TableCell className="text-right">{c.orderCount}</TableCell>
+                  <TableCell className="text-right">
+                    ${Number(c.totalSpent).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => openEdit(c)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setDeleteId(c.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editCustomer ? "Editar cliente" : "Nuevo cliente"}</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit((v) => saveMutation.mutate(v))} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="name" render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Nombre *</FormLabel>
+                    <FormControl><Input placeholder="María García" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl><Input type="email" placeholder="mail@ejemplo.com" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="phone" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl><Input placeholder="+52 55 0000 0000" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="isB2B" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo</FormLabel>
+                    <FormControl>
+                      <select
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        {...field}
+                      >
+                        <option value="false">Minorista</option>
+                        <option value="true">B2B / Empresa</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="companyName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Empresa</FormLabel>
+                    <FormControl><Input placeholder="Empresa S.A." {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="taxId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>RFC / RUC</FormLabel>
+                    <FormControl><Input placeholder="XAXX010101000" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="creditLimit" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Límite de crédito</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value === "" ? undefined : e.target.valueAsNumber)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="address" render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Dirección</FormLabel>
+                    <FormControl><Input placeholder="Calle, número, colonia…" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="notes" render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Notas</FormLabel>
+                    <FormControl><Textarea rows={2} placeholder="Preferencias, observaciones…" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={saveMutation.isPending}>
+                  {saveMutation.isPending ? "Guardando…" : "Guardar"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm */}
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Los clientes con pedidos no pueden eliminarse.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
