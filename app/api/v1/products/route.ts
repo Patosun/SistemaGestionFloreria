@@ -42,6 +42,10 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"))
   const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") ?? "20")))
   const skip = (page - 1) * limit
+  const sort = searchParams.get("sort") ?? "name"
+  const dir = (searchParams.get("dir") ?? "asc") as "asc" | "desc"
+  const allowedSorts = ["name", "sku", "createdAt", "updatedAt"]
+  const safeSort = allowedSorts.includes(sort) ? sort : "name"
 
   const where = {
     ...(q && {
@@ -66,7 +70,7 @@ export async function GET(req: NextRequest) {
         },
         _count: { select: { variants: true } },
       },
-      orderBy: { name: "asc" },
+      orderBy: { [safeSort]: dir },
       skip,
       take: limit,
     }),

@@ -1,100 +1,96 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Plus, Pencil, Trash2, Search } from "lucide-react"
+import { Plus, Pencil, Trash2, Search, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProductDialog } from "@/components/products/product-dialog"
+import { TablePagination, SortableHead } from "@/components/ui/data-table-controls"
 
 type Variant = { id: string; sku: string; name: string; price: string; costPrice: string }
 type Category = { id: string; name: string }
 type Product = {
-  id: string
-  sku: string
-  name: string
-  slug: string
-  description?: string | null
-  categoryId?: string | null
-  isPublic: boolean
-  isSeasonal: boolean
-  freshnessDays: number | null
-  category: Category | null
-  variants: Variant[]
-  _count: { variants: number }
+  id: string; sku: string; name: string; slug: string
+  description?: string | null; categoryId?: string | null
+  isPublic: boolean; isSeasonal: boolean; freshnessDays: number | null
+  category: Category | null; variants: Variant[]; _count: { variants: number }
 }
 
-async function fetchProducts(q: string): Promise<{ data: Product[]; meta: { total: number } }> {
-  const res = await fetch(`/api/v1/products?q=${encodeURIComponent(q)}&limit=100`)
-  if (!res.ok) throw new Error("Error al cargar productos")
-  return res.json()
-}
+const LIMIT = 20
 
-async function deleteProduct(id: string) {
-  const res = await fetch(`/api/v1/products/${id}`, { method: "DELETE" })
-  const json = await res.json()
-  if (!res.ok) throw new Error(json.error ?? "Error al eliminar")
-  return json
-}
+function ProductsInner() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const qc = useQueryClient()
 
-export default function ProductsPage() {
-  const [query, setQuery] = useState("")
-  const [search, setSearch] = useState("")
+  const q = searchParams.get("q") ?? ""
+  const page = Math.max(1, Number(searchParams.get("page") ?? "1"))
+  const sort = searchParams.get("sort") ?? "name"
+  const dir = (searchParams.get("dir") ?? "asc") as "asc" | "desc"
+
+  const [inputQ, setInputQ] = useState(q)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const queryClient = useQueryClient()
+  useEffect(() => { setInputQ(q) }, [q])
+
+  function navigate(overrides: Record<string, string>) {
+    const params = new URLSearchParams(searchParams.toString())
+    Object.entries(overrides).forEach(([k, v]) => (v ? params.set(k, v) : params.delete(k)))
+    router.push(`${pathname}?${params}`)
+  }
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    navigate({ q: inputQ, page: "1" })
+  }
+
+  function clearSearch() {
+    setInputQ("")
+    navigate({ q: "", page: "1" })
+  }
 
   const { data, isLoading } = useQuery({
-    queryKey: ["products", search],
-    queryFn: () => fetchProducts(search),
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteProduct,
-    onSuccess: () => {
-      toast.success("Producto eliminado")
-      queryClient.invalidateQueries({ queryKey: ["products"] })
-      setDeleteId(null)
+    queryKey: ["products", q, page, sort, dir],
+    queryFn: async () => {
+      const params = new URLSearchParams({ q, page: String(page), limit: String(LIMIT), sort, dir })
+      const res = await fetch(`/api/v1/products?${params}`)
+      if (!res.ok) throw new Error("Error al cargar productos")
+      return res.json() as Promise<{ data: Product[]; meta: { total: number } }>
     },
-    onError: (e: Error) => toast.error(e.message),
   })
 
   const products = data?.data ?? []
   const total = data?.meta?.total ?? 0
 
-  function openCreate() {
-    setEditProduct(null)
-    setDialogOpen(true)
-  }
-
-  function openEdit(p: Product) {
-    setEditProduct(p)
-    setDialogOpen(true)
-  }
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/v1/products/${id}`, { method: "DELETE" })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? "Error al eliminar")
+    },
+    onSuccess: () => {
+      toast.success("Producto eliminado")
+      setDeleteId(null)
+      qc.invalidateQueries({ queryKey: ["products"] })
+    },
+    onError: (e: Error) => { toast.error(e.message); setDeleteId(null) },
+  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -103,56 +99,48 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-semibold font-heading">Productos</h1>
           <p className="text-sm text-muted-foreground">{total} productos en el catálogo</p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo producto
+        <Button onClick={() => { setEditProduct(null); setDialogOpen(true) }}>
+          <Plus className="mr-2 h-4 w-4" /> Nuevo producto
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="flex gap-2">
-        <div className="relative flex-1 max-w-sm">
+      <form onSubmit={handleSearch} className="flex gap-2 max-w-sm">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            className="pl-9"
-            placeholder="Buscar por nombre o SKU..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && setSearch(query)}
+            className="pl-9 pr-8"
+            placeholder="Buscar por nombre o SKU…"
+            value={inputQ}
+            onChange={(e) => setInputQ(e.target.value)}
           />
+          {inputQ && (
+            <button type="button" onClick={clearSearch} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
-        <Button variant="outline" onClick={() => setSearch(query)}>
-          Buscar
-        </Button>
-        {search && (
-          <Button variant="ghost" onClick={() => { setSearch(""); setQuery("") }}>
-            Limpiar
-          </Button>
-        )}
-      </div>
+        <Button type="submit" variant="outline">Buscar</Button>
+      </form>
 
-      {/* Table */}
       <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>SKU</TableHead>
-              <TableHead>Nombre</TableHead>
+              <SortableHead column="sku" currentSort={sort} currentDir={dir}>SKU</SortableHead>
+              <SortableHead column="name" currentSort={sort} currentDir={dir}>Nombre</SortableHead>
               <TableHead>Categoría</TableHead>
               <TableHead>Variantes</TableHead>
               <TableHead>Frescura</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="text-right px-4">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading
-              ? Array.from({ length: 5 }).map((_, i) => (
+              ? Array.from({ length: LIMIT }).map((_, i) => (
                   <TableRow key={i}>
                     {Array.from({ length: 7 }).map((_, j) => (
-                      <TableCell key={j}>
-                        <Skeleton className="h-4 w-full" />
-                      </TableCell>
+                      <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -160,7 +148,7 @@ export default function ProductsPage() {
                 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
-                      No se encontraron productos
+                      {q ? `Sin resultados para "${q}"` : "No hay productos"}
                     </TableCell>
                   </TableRow>
                 )
@@ -169,37 +157,24 @@ export default function ProductsPage() {
                     <TableCell className="font-mono text-sm">{p.sku}</TableCell>
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell>{p.category?.name ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell><Badge variant="secondary">{p._count.variants}</Badge></TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{p._count.variants}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {p.freshnessDays ? (
-                        <span className="text-sm">{p.freshnessDays} días</span>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
-                      )}
+                      {p.freshnessDays
+                        ? <span className="text-sm">{p.freshnessDays} días</span>
+                        : <span className="text-muted-foreground text-sm">—</span>}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        {p.isPublic ? (
-                          <Badge variant="default">Público</Badge>
-                        ) : (
-                          <Badge variant="outline">Interno</Badge>
-                        )}
+                        {p.isPublic ? <Badge>Público</Badge> : <Badge variant="outline">Interno</Badge>}
                         {p.isSeasonal && <Badge variant="secondary">Temporada</Badge>}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(p)}>
+                        <Button variant="ghost" size="icon" onClick={() => { setEditProduct(p); setDialogOpen(true) }}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteId(p.id)}
-                        >
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteId(p.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -208,24 +183,21 @@ export default function ProductsPage() {
                 ))}
           </TableBody>
         </Table>
+        <TablePagination page={page} total={total} limit={LIMIT} />
       </div>
 
-      {/* Create / Edit dialog */}
       <ProductDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         product={editProduct}
-        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["products"] })}
+        onSuccess={() => qc.invalidateQueries({ queryKey: ["products"] })}
       />
 
-      {/* Delete confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El producto se eliminará permanentemente.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
@@ -240,4 +212,8 @@ export default function ProductsPage() {
       </AlertDialog>
     </div>
   )
+}
+
+export default function ProductsPage() {
+  return <Suspense><ProductsInner /></Suspense>
 }

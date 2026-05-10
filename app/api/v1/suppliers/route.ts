@@ -17,14 +17,38 @@ const supplierSchema = z.object({
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
+  const q = searchParams.get("q") ?? ""
   const includeInactive = searchParams.get("includeInactive") === "true"
+  const page = Math.max(1, Number(searchParams.get("page") ?? "1"))
+  const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") ?? "20")))
+  const skip = (page - 1) * limit
+  const sort = searchParams.get("sort") ?? "name"
+  const dir = (searchParams.get("dir") ?? "asc") as "asc" | "desc"
+  const allowedSorts = ["name", "contactName", "email", "isActive", "createdAt"]
+  const safeSort = allowedSorts.includes(sort) ? sort : "name"
 
-  const suppliers = await db.supplier.findMany({
-    where: includeInactive ? {} : { isActive: true },
-    include: { _count: { select: { lots: true, purchaseOrders: true } } },
-    orderBy: { name: "asc" },
-  })
-  return ok(suppliers)
+  const where = {
+    ...(includeInactive ? {} : { isActive: true }),
+    ...(q && {
+      OR: [
+        { name: { contains: q, mode: "insensitive" as const } },
+        { contactName: { contains: q, mode: "insensitive" as const } },
+        { email: { contains: q, mode: "insensitive" as const } },
+      ],
+    }),
+  }
+
+  const [suppliers, total] = await Promise.all([
+    db.supplier.findMany({
+      where,
+      include: { _count: { select: { lots: true, purchaseOrders: true } } },
+      orderBy: { [safeSort]: dir },
+      skip,
+      take: limit,
+    }),
+    db.supplier.count({ where }),
+  ])
+  return ok(suppliers, { page, limit, total })
 }
 
 export async function POST(req: NextRequest) {

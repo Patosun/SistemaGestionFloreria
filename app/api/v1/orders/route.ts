@@ -46,6 +46,10 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"))
   const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") ?? "20")))
   const skip = (page - 1) * limit
+  const sort = searchParams.get("sort") ?? "createdAt"
+  const dir = (searchParams.get("dir") ?? "desc") as "asc" | "desc"
+  const allowedSorts = ["orderNumber", "createdAt", "total", "status", "scheduledDate"]
+  const safeSort = allowedSorts.includes(sort) ? sort : "createdAt"
 
   const where = {
     ...(status && { status: status as never }),
@@ -71,7 +75,7 @@ export async function GET(req: NextRequest) {
   const [orders, total] = await Promise.all([
     db.order.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { [safeSort]: dir },
       skip,
       take: limit,
       include: {
