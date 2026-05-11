@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { signIn } from "@/lib/auth-client"
 import { loginSchema } from "@/lib/validators"
@@ -15,6 +15,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  // Redirect to setup wizard if no admin exists yet
+  useEffect(() => {
+    fetch("/api/v1/setup")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.data?.needsSetup) router.replace("/setup")
+      })
+      .catch(() => {/* ignore */})
+  }, [router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
