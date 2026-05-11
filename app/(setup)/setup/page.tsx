@@ -200,7 +200,7 @@ export default function SetupPage() {
                 <Label htmlFor="companyCity">Ciudad</Label>
                 <Input
                   id="companyCity"
-                  placeholder="Ciudad de México"
+                  placeholder="La Paz"
                   value={form.companyCity}
                   onChange={(e) => set("companyCity", e.target.value)}
                 />
