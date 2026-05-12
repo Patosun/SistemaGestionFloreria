@@ -8,8 +8,10 @@ export const runtime = "nodejs"
 const PUBLIC_PATHS = [
   "/",
   "/login",
+  "/setup",
   "/store",
   "/api/auth",
+  "/api/v1/setup",
   "/api/v1/chatbot",
   "/_next",
   "/favicon",

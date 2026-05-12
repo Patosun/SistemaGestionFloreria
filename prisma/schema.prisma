@@ -7,9 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─────────────────────────────────────────────
 // AUTH (better-auth compatible schema)
-// ─────────────────────────────────────────────
 
 model User {
   id            String    @id @default(cuid())
@@ -88,9 +86,6 @@ enum UserRole {
   CUSTOMER
 }
 
-// ─────────────────────────────────────────────
-// AUDIT LOG
-// ─────────────────────────────────────────────
 
 model AuditLog {
   id         String   @id @default(cuid())
@@ -112,9 +107,6 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-// ─────────────────────────────────────────────
-// SUPPLIERS
-// ─────────────────────────────────────────────
 
 model Supplier {
   id            String          @id @default(cuid())
@@ -134,9 +126,6 @@ model Supplier {
   @@map("suppliers")
 }
 
-// ─────────────────────────────────────────────
-// CATALOG – PRODUCTS & VARIANTS
-// ─────────────────────────────────────────────
 
 model Category {
   id          String    @id @default(cuid())
@@ -163,10 +152,10 @@ model Product {
   slug            String          @unique
   description     String?
   categoryId      String?
-  freshnessDays   Int?            // días de vida útil (null = no perecedero)
+  freshnessDays   Int?           
   isSeasonal      Boolean         @default(false)
-  isPublic        Boolean         @default(true)  // visible en e-commerce
-  isComposite     Boolean         @default(false) // arreglo con BOM
+  isPublic        Boolean         @default(true)  
+  isComposite     Boolean         @default(false) 
   images          String[]
   tags            String[]
   createdAt       DateTime        @default(now())
@@ -188,11 +177,11 @@ model ProductVariant {
   id          String    @id @default(cuid())
   productId   String
   sku         String    @unique
-  name        String    // "Docena", "Medio ramo", etc.
+  name        String    
   price       Decimal   @db.Decimal(10, 2)
   b2bPrice    Decimal?  @db.Decimal(10, 2)
   costPrice   Decimal   @db.Decimal(10, 2)
-  attributes  Json?     // {color, size, packaging, ...}
+  attributes  Json?     
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -206,9 +195,6 @@ model ProductVariant {
   @@map("product_variants")
 }
 
-// ─────────────────────────────────────────────
-// BILL OF MATERIALS (recetas de arreglos)
-// ─────────────────────────────────────────────
 
 model BomItem {
   id                String   @id @default(cuid())
@@ -225,9 +211,6 @@ model BomItem {
   @@map("bom_items")
 }
 
-// ─────────────────────────────────────────────
-// INVENTORY – LOTS & LOCATIONS
-// ─────────────────────────────────────────────
 
 model InventoryLocation {
   id          String   @id @default(cuid())
@@ -301,9 +284,7 @@ enum MovementType {
   RETURN       // devolución
 }
 
-// ─────────────────────────────────────────────
-// CUSTOMERS & CRM
-// ─────────────────────────────────────────────
+
 
 model Customer {
   id              String          @id @default(cuid())
@@ -331,7 +312,7 @@ model Customer {
 model CustomerAddress {
   id         String   @id @default(cuid())
   customerId String
-  label      String?  // "Casa", "Oficina"
+  label      String?  
   street     String
   city       String
   state      String?
@@ -351,9 +332,9 @@ model CustomerAddress {
 model ImportantDate {
   id          String   @id @default(cuid())
   customerId  String
-  label       String   // "Cumpleaños", "Aniversario", "Día de la madre"
+  label       String   
   date        DateTime
-  reminderDays Int[]   // alertar N días antes: [3, 7, 15]
+  reminderDays Int[]   
   notes       String?
 
   customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -363,9 +344,6 @@ model ImportantDate {
   @@map("important_dates")
 }
 
-// ─────────────────────────────────────────────
-// ORDERS (POS + E-commerce + Chatbot)
-// ─────────────────────────────────────────────
 
 model Order {
   id              String       @id @default(cuid())
@@ -409,7 +387,7 @@ model OrderItem {
   orderId     String
   variantId   String
   productId   String
-  name        String         // snapshot del nombre en el momento de la venta
+  name        String         
   quantity    Decimal        @db.Decimal(10, 3)
   unitPrice   Decimal        @db.Decimal(10, 2)
   costPrice   Decimal        @db.Decimal(10, 2)
@@ -451,10 +429,6 @@ enum DeliverySlot {
   SLOT_18_21
 }
 
-// ─────────────────────────────────────────────
-// PAYMENTS
-// ─────────────────────────────────────────────
-
 model Payment {
   id              String        @id @default(cuid())
   orderId         String
@@ -490,10 +464,6 @@ enum PaymentStatus {
   FAILED
   REFUNDED
 }
-
-// ─────────────────────────────────────────────
-// PROMOTIONS & DISCOUNTS
-// ─────────────────────────────────────────────
 
 model Promotion {
   id            String          @id @default(cuid())
@@ -535,10 +505,6 @@ enum PromotionType {
   VOLUME
 }
 
-// ─────────────────────────────────────────────
-// PURCHASE ORDERS (Compras a proveedores)
-// ─────────────────────────────────────────────
-
 model PurchaseOrder {
   id          String             @id @default(cuid())
   supplierId  String
@@ -579,9 +545,6 @@ enum PurchaseStatus {
   CANCELED
 }
 
-// ─────────────────────────────────────────────
-// PRODUCTION ORDERS
-// ─────────────────────────────────────────────
 
 model ProductionOrder {
   id             String            @id @default(cuid())
@@ -614,9 +577,6 @@ enum ProductionStatus {
   CANCELED
 }
 
-// ─────────────────────────────────────────────
-// DELIVERY & LOGISTICS
-// ─────────────────────────────────────────────
 
 model Delivery {
   id              String         @id @default(cuid())
@@ -656,10 +616,6 @@ enum DeliveryStatus {
   RETURNED
 }
 
-// ─────────────────────────────────────────────
-// CALENDAR & EVENTS
-// ─────────────────────────────────────────────
-
 model CalendarEvent {
   id          String          @id @default(cuid())
   orderId     String?         @unique
@@ -684,7 +640,7 @@ model CalendarEvent {
 model CapacityConfig {
   id          String    @id @default(cuid())
   slot        DeliverySlot
-  dayOfWeek   Int?      // 0=Sun … 6=Sat; null = todos los días
+  dayOfWeek   Int?      
   maxOrders   Int
   updatedAt   DateTime  @updatedAt
 
@@ -710,9 +666,6 @@ enum EventStatus {
   RESCHEDULED
 }
 
-// ─────────────────────────────────────────────
-// CASH REGISTER (POS Caja)
-// ─────────────────────────────────────────────
 
 model CashRegisterSession {
   id              String    @id @default(cuid())
@@ -728,5 +681,24 @@ model CashRegisterSession {
 
   @@index([openedAt])
   @@map("cash_register_sessions")
+}
+
+// ─────────────────────────────────────────────
+// COMPANY SETTINGS (singleton — id = "singleton")
+// ─────────────────────────────────────────────
+
+model CompanySetting {
+  id        String   @id @default("singleton")
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  currency  String   @default("MXN")
+  timezone  String   @default("America/Mexico_City")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("company_settings")
 }
 
