@@ -1,21 +1,36 @@
-# Next.js template
+# Sistema de gestion de floreria
 
-This is a Next.js template with shadcn/ui.
+Grupo: Rancho de broken
 
-## Adding components
+Rubro: 1 (comercio y retail)
 
-To add components to your app, run the following command:
+- Apaza Choque Jose Ariel 
+- Chacolla Aduviri Evan Leonel
+- Marin Cardozo Carlos
+- Villca Flores  Samuel Hernry
+- Fabiani Cortes Rafael Alejandro
 
-```bash
-npx shadcn@latest add button
-```
+## Stack Tecnologico
 
-This will place the ui components in the `components` directory.
+#### Frontend 
 
-## Using components
+Next 16.2, React server components, Typescript
 
-To use the components in your app, import them as follows:
+#### UI/UX
 
-```tsx
-import { Button } from "@/components/ui/button";
-```
+TailwindCSS, Shadcn (RadixUI), Framer motion (Libreria para animaciones)
+
+#### Backend
+
+Next.js API routes + Server actions, Better Auth (Autenticacion moderna con RBAC), Zustand, TanStack
+
+#### Base de datos
+
+PostgreSQL, Prisma ORM, NEON (Plataforma serverless para base de datos)
+
+#### Arquitectura del sistema:
+El sistema usa una arquitectura híbrida monolítica construida sobre Next.js 16 (App Router) con React Server Components como paradigma principal. Es una aplicación full-stack TypeScript donde el frontend y backend conviven en un mismo proyecto, organizados por route groups ((admin), (pos), (auth), (setup)) que separan la aplicación en módulos funcionales sin afectar las URLs.
+
+
+#### ¿Qué es una arquitectura hibrida monolítica?
+Es un enfoque de diseño de software que combina la estructura unificada de un monolito tradicional con elementos de microservicios, diseñado para ser construido y desplegado como una sola unidad.
