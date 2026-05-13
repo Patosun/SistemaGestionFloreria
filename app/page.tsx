@@ -1,15 +1,7 @@
 import { redirect } from "next/navigation"
-import { db } from "@/lib/db"
 
-// La raíz comprueba si el sistema necesita configuración inicial
-export default async function RootPage() {
-  const adminCount = await db.user.count({
-    where: { role: { in: ["SUPER_ADMIN", "ADMIN"] } },
-  })
-
-  if (adminCount === 0) {
-    redirect("/setup")
-  }
-
-  redirect("/login")
+// La raíz redirige a la tienda pública (los clientes llegan aquí)
+// El panel de administración está en /dashboard (requiere login)
+export default function RootPage() {
+  redirect("/store")
 }
