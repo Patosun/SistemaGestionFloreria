@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
+import { PageShell } from "@/components/admin/page-shell"
 
 type OrderDetail = {
   id: string
@@ -180,7 +181,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const nextStatuses = NEXT_STATUSES[order.status] ?? []
 
   return (
-    <div className="space-y-6">
+    <PageShell>
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/admin/orders">
@@ -193,7 +194,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             Pedido #{order.orderNumber.slice(-8).toUpperCase()}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {new Date(order.createdAt).toLocaleString("es-MX")}
+            {new Date(order.createdAt).toLocaleString("es-BO")}
             {order.createdBy ? ` · Creado por ${order.createdBy.name}` : ""}
           </p>
         </div>
@@ -205,8 +206,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left col: items + payments */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Items */}
-          <Card>
+          <Card className="rounded-2xl border-border/50">
             <CardHeader>
               <CardTitle>Productos</CardTitle>
             </CardHeader>
@@ -232,15 +232,15 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                       </td>
                       <td className="px-4 py-3 text-right">{Number(item.quantity)}</td>
                       <td className="px-4 py-3 text-right">
-                        ${Number(item.unitPrice).toFixed(2)}
+                        Bs. {Number(item.unitPrice).toFixed(0)}
                         {Number(item.discount) > 0 && (
                           <span className="text-xs text-muted-foreground block">
-                            -{Number(item.discount).toFixed(2)}
+                            -{Number(item.discount).toFixed(0)}
                           </span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right font-medium">
-                        ${Number(item.total).toFixed(2)}
+                        Bs. {Number(item.total).toFixed(0)}
                       </td>
                     </tr>
                   ))}
@@ -249,31 +249,30 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <div className="px-4 py-3 space-y-1 border-t">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>${Number(order.subtotal).toFixed(2)}</span>
+                  <span>Bs. {Number(order.subtotal).toFixed(0)}</span>
                 </div>
                 {Number(order.discountAmount) > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Descuento</span>
-                    <span>-${Number(order.discountAmount).toFixed(2)}</span>
+                    <span>-Bs. {Number(order.discountAmount).toFixed(0)}</span>
                   </div>
                 )}
                 {Number(order.taxAmount) > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Impuestos</span>
-                    <span>${Number(order.taxAmount).toFixed(2)}</span>
+                    <span>Bs. {Number(order.taxAmount).toFixed(0)}</span>
                   </div>
                 )}
                 <Separator className="my-1" />
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span>${Number(order.total).toFixed(2)}</span>
+                  <span>Bs. {Number(order.total).toFixed(0)}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Payments */}
-          <Card>
+          <Card className="rounded-2xl border-border/50">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Pagos</CardTitle>
               {remaining > 0.01 && !["CANCELED", "REFUNDED"].includes(order.status) && (
@@ -294,22 +293,22 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                         <span>{METHOD_LABELS[p.method] ?? p.method}</span>
                         {p.paidAt && (
                           <span className="text-muted-foreground">
-                            {new Date(p.paidAt).toLocaleDateString("es-MX")}
+                            {new Date(p.paidAt).toLocaleDateString("es-BO")}
                           </span>
                         )}
                       </div>
-                      <span className="font-medium">${Number(p.amount).toFixed(2)}</span>
+                      <span className="font-medium">Bs. {Number(p.amount).toFixed(0)}</span>
                     </div>
                   ))}
                   <Separator />
                   <div className="flex justify-between text-sm font-medium">
                     <span>Pagado</span>
-                    <span className="text-green-600">${totalPaid.toFixed(2)}</span>
+                    <span className="text-green-600">Bs. {totalPaid.toFixed(0)}</span>
                   </div>
                   {remaining > 0.01 && (
                     <div className="flex justify-between text-sm font-medium">
                       <span>Saldo pendiente</span>
-                      <span className="text-destructive">${remaining.toFixed(2)}</span>
+                      <span className="text-destructive">Bs. {remaining.toFixed(0)}</span>
                     </div>
                   )}
                 </div>
@@ -320,8 +319,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
         {/* Right col: info + actions */}
         <div className="space-y-6">
-          {/* Customer */}
-          <Card>
+          <Card className="rounded-2xl border-border/50">
             <CardHeader><CardTitle>Cliente</CardTitle></CardHeader>
             <CardContent className="text-sm space-y-1">
               {order.customer ? (
@@ -345,7 +343,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 {order.shippingCity && <p className="text-muted-foreground">{order.shippingCity}</p>}
                 {order.scheduledDate && (
                   <p className="text-muted-foreground">
-                    {new Date(order.scheduledDate).toLocaleDateString("es-MX")}
+                    {new Date(order.scheduledDate).toLocaleDateString("es-BO")}
                     {order.deliverySlot ? ` · ${SLOT_LABELS[order.deliverySlot]}` : ""}
                   </p>
                 )}
@@ -385,7 +383,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* Payment Dialog */}
       <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle>Registrar pago</DialogTitle>
           </DialogHeader>
@@ -413,7 +411,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 onChange={(e) => setPayAmount(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Saldo pendiente: ${remaining.toFixed(2)}
+                Saldo pendiente: Bs. {remaining.toFixed(0)}
               </p>
             </div>
           </div>
@@ -428,6 +426,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   )
 }

@@ -17,9 +17,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LotDialog } from "@/components/inventory/lot-dialog"
 import { AdjustDialog } from "@/components/inventory/adjust-dialog"
+import { PageShell, PageHeader } from "@/components/admin/page-shell"
 
 type StockSummary = {
   variantId: string
@@ -107,76 +107,58 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold font-heading">Inventario</h1>
-          <p className="text-sm text-muted-foreground">{total} lotes activos</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={refresh}>
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          <Button onClick={() => setLotDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Ingresar lote
-          </Button>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Inventario"
+        description={`${total} lotes activos`}
+        action={
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" className="rounded-xl" onClick={refresh}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Button onClick={() => setLotDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Ingresar lote
+            </Button>
+          </div>
+        }
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Variantes con stock</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{summaries.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Lotes activos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{total}</p>
-          </CardContent>
-        </Card>
-        <Card className={criticalCount > 0 ? "border-destructive" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-              Críticos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-destructive">{criticalCount}</p>
-          </CardContent>
-        </Card>
-        <Card className={warningCount > 0 ? "border-yellow-500" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-              <AlertTriangle className="h-4 w-4 text-yellow-500" />
-              Advertencias
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-yellow-500">{warningCount}</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border/50 bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Variantes con stock</p>
+          <p className="text-3xl font-bold">{summaries.length}</p>
+        </div>
+        <div className="rounded-2xl border border-border/50 bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Lotes activos</p>
+          <p className="text-3xl font-bold">{total}</p>
+        </div>
+        <div className={`rounded-2xl border p-5 ${criticalCount > 0 ? "border-destructive/40 bg-destructive/[0.03]" : "border-border/50 bg-card"}`}>
+          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+            <AlertTriangle className="h-3.5 w-3.5 text-destructive" />Críticos
+          </p>
+          <p className="text-3xl font-bold text-destructive">{criticalCount}</p>
+        </div>
+        <div className={`rounded-2xl border p-5 ${warningCount > 0 ? "border-yellow-400/40 bg-yellow-50/50 dark:bg-yellow-900/10" : "border-border/50 bg-card"}`}>
+          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+            <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />Advertencias
+          </p>
+          <p className="text-3xl font-bold text-yellow-500">{warningCount}</p>
+        </div>
       </div>
 
       <Tabs defaultValue="lots">
-        <TabsList>
-          <TabsTrigger value="lots">
+        <TabsList className="rounded-xl">
+          <TabsTrigger value="lots" className="rounded-lg">
             <Package className="mr-1 h-4 w-4" />
             Lotes
           </TabsTrigger>
-          <TabsTrigger value="summary">Resumen por variante</TabsTrigger>
-          <TabsTrigger value="alerts">
+          <TabsTrigger value="summary" className="rounded-lg">Resumen por variante</TabsTrigger>
+          <TabsTrigger value="alerts" className="rounded-lg">
             Alertas
             {(criticalCount + warningCount) > 0 && (
-              <Badge variant="destructive" className="ml-2 text-xs">
+              <Badge variant="destructive" className="ml-2 text-xs rounded-full">
                 {criticalCount + warningCount}
               </Badge>
             )}
@@ -185,10 +167,10 @@ export default function InventoryPage() {
 
         {/* Lots tab */}
         <TabsContent value="lots">
-          <div className="rounded-lg border bg-card">
+          <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent border-border/50">
                   <TableHead>Producto</TableHead>
                   <TableHead>Variante SKU</TableHead>
                   <TableHead>Lote #</TableHead>
@@ -212,7 +194,7 @@ export default function InventoryPage() {
                   : lots.length === 0
                     ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center text-muted-foreground py-10">
+                        <TableCell colSpan={9} className="text-center text-muted-foreground py-14">
                           No hay lotes activos. Ingresa mercancía para comenzar.
                         </TableCell>
                       </TableRow>
@@ -222,36 +204,37 @@ export default function InventoryPage() {
                         ? Math.floor((new Date(lot.expiresAt).getTime() - Date.now()) / 86_400_000)
                         : null
                       return (
-                        <TableRow key={lot.id}>
-                          <TableCell className="font-medium">{lot.variant.product.name}</TableCell>
-                          <TableCell className="font-mono text-sm">{lot.variant.sku}</TableCell>
-                          <TableCell>{lot.lotNumber ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableRow key={lot.id} className="border-border/40 hover:bg-muted/30 transition-colors">
+                          <TableCell className="font-medium text-sm">{lot.variant.product.name}</TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">{lot.variant.sku}</TableCell>
+                          <TableCell className="text-sm">{lot.lotNumber ?? <span className="text-muted-foreground">—</span>}</TableCell>
                           <TableCell>
-                            <span className="font-medium">{Number(lot.quantityCurrent).toFixed(0)}</span>
+                            <span className="font-semibold text-sm">{Number(lot.quantityCurrent).toFixed(0)}</span>
                             <span className="text-muted-foreground text-xs"> / {Number(lot.quantityInitial).toFixed(0)}</span>
                           </TableCell>
-                          <TableCell>${Number(lot.costPerUnit).toFixed(2)}</TableCell>
-                          <TableCell className="text-sm">
-                            {new Date(lot.receivedAt).toLocaleDateString("es-MX")}
+                          <TableCell className="text-sm">Bs. {Number(lot.costPerUnit).toFixed(0)}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {new Date(lot.receivedAt).toLocaleDateString("es-BO")}
                           </TableCell>
                           <TableCell>
                             {daysLeft === null ? (
-                              <span className="text-muted-foreground text-sm">—</span>
+                              <span className="text-muted-foreground text-xs">—</span>
                             ) : daysLeft < 0 ? (
-                              <Badge variant="destructive">Vencido</Badge>
+                              <Badge variant="destructive" className="rounded-full text-xs">Vencido</Badge>
                             ) : daysLeft <= 1 ? (
-                              <Badge variant="destructive">{daysLeft}d</Badge>
+                              <Badge variant="destructive" className="rounded-full text-xs">{daysLeft}d</Badge>
                             ) : daysLeft <= 3 ? (
-                              <Badge className="bg-yellow-500">{daysLeft}d</Badge>
+                              <Badge className="bg-yellow-500 rounded-full text-xs">{daysLeft}d</Badge>
                             ) : (
-                              <span className="text-sm">{daysLeft}d</span>
+                              <span className="text-xs text-muted-foreground">{daysLeft}d</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-sm">{lot.supplier?.name ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{lot.supplier?.name ?? "—"}</TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="outline"
                               size="sm"
+                              className="rounded-lg text-xs"
                               onClick={() => setAdjustLotId(lot.id)}
                             >
                               Ajustar
@@ -267,10 +250,10 @@ export default function InventoryPage() {
 
         {/* Summary tab */}
         <TabsContent value="summary">
-          <div className="rounded-lg border bg-card">
+          <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent border-border/50">
                   <TableHead>Producto</TableHead>
                   <TableHead>SKU Variante</TableHead>
                   <TableHead>Stock total</TableHead>
@@ -291,26 +274,26 @@ export default function InventoryPage() {
                   : summaries.length === 0
                     ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-14">
                           Sin stock registrado
                         </TableCell>
                       </TableRow>
                     )
                     : summaries.map((s) => (
-                      <TableRow key={s.variantId}>
-                        <TableCell className="font-medium">{s.productName}</TableCell>
-                        <TableCell className="font-mono text-sm">{s.variantSku}</TableCell>
-                        <TableCell className="font-bold">{s.totalStock.toFixed(0)}</TableCell>
-                        <TableCell>{s.activeLots}</TableCell>
+                      <TableRow key={s.variantId} className="border-border/40 hover:bg-muted/30 transition-colors">
+                        <TableCell className="font-medium text-sm">{s.productName}</TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{s.variantSku}</TableCell>
+                        <TableCell className="font-bold text-sm">{s.totalStock.toFixed(0)}</TableCell>
+                        <TableCell className="text-sm">{s.activeLots}</TableCell>
                         <TableCell>
                           {s.nearExpiryLots > 0 ? (
-                            <Badge className="bg-yellow-500">{s.nearExpiryLots}</Badge>
-                          ) : "—"}
+                            <Badge className="bg-yellow-500 rounded-full text-xs">{s.nearExpiryLots}</Badge>
+                          ) : <span className="text-muted-foreground text-xs">—</span>}
                         </TableCell>
                         <TableCell>
                           {s.expiredLots > 0 ? (
-                            <Badge variant="destructive">{s.expiredLots}</Badge>
-                          ) : "—"}
+                            <Badge variant="destructive" className="rounded-full text-xs">{s.expiredLots}</Badge>
+                          ) : <span className="text-muted-foreground text-xs">—</span>}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -321,10 +304,10 @@ export default function InventoryPage() {
 
         {/* Alerts tab */}
         <TabsContent value="alerts">
-          <div className="rounded-lg border bg-card">
+          <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent border-border/50">
                   <TableHead>Nivel</TableHead>
                   <TableHead>Producto</TableHead>
                   <TableHead>Lote</TableHead>
@@ -345,29 +328,31 @@ export default function InventoryPage() {
                   : alerts.length === 0
                     ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-14">
                           Sin alertas de frescura. ¡Todo en orden!
                         </TableCell>
                       </TableRow>
                     )
                     : alerts.map((a) => (
-                      <TableRow key={a.lotId}>
+                      <TableRow key={a.lotId} className="border-border/40 hover:bg-muted/30 transition-colors">
                         <TableCell>
-                          <Badge variant={a.alertLevel === "critical" ? "destructive" : "secondary"}
-                            className={a.alertLevel === "warning" ? "bg-yellow-500 text-white" : ""}>
+                          <Badge
+                            variant={a.alertLevel === "critical" ? "destructive" : "secondary"}
+                            className={`rounded-full text-xs ${a.alertLevel === "warning" ? "bg-yellow-500 text-white" : ""}`}
+                          >
                             {a.alertLevel === "critical" ? "Crítico" : "Advertencia"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="font-medium">{a.productName}</TableCell>
+                        <TableCell className="font-medium text-sm">{a.productName}</TableCell>
                         <TableCell className="text-sm">{a.lotNumber ?? "—"}</TableCell>
-                        <TableCell>{a.quantityCurrent.toFixed(0)}</TableCell>
-                        <TableCell className="text-sm">
-                          {a.expiresAt ? new Date(a.expiresAt).toLocaleDateString("es-MX") : "—"}
+                        <TableCell className="text-sm">{a.quantityCurrent.toFixed(0)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {a.expiresAt ? new Date(a.expiresAt).toLocaleDateString("es-BO") : "—"}
                         </TableCell>
                         <TableCell>
-                          {a.daysLeft === null ? "—" : a.daysLeft < 0
-                            ? <span className="text-destructive font-medium">Vencido ({Math.abs(a.daysLeft)}d)</span>
-                            : <span className={a.daysLeft <= 1 ? "text-destructive font-medium" : "text-yellow-500 font-medium"}>
+                          {a.daysLeft === null ? <span className="text-muted-foreground text-xs">—</span> : a.daysLeft < 0
+                            ? <span className="text-destructive font-semibold text-xs">Vencido ({Math.abs(a.daysLeft)}d)</span>
+                            : <span className={`font-semibold text-xs ${a.daysLeft <= 1 ? "text-destructive" : "text-yellow-500"}`}>
                               {a.daysLeft}d
                             </span>}
                         </TableCell>
@@ -390,6 +375,6 @@ export default function InventoryPage() {
         onOpenChange={(open) => !open && setAdjustLotId(null)}
         onSuccess={refresh}
       />
-    </div>
+    </PageShell>
   )
 }

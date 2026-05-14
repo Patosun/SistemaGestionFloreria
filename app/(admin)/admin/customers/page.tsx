@@ -28,6 +28,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { TablePagination, SortableHead } from "@/components/ui/data-table-controls"
+import { PageShell, PageHeader, PageCard } from "@/components/admin/page-shell"
 
 type Customer = {
   id: string; name: string; email: string | null; phone: string | null
@@ -148,29 +149,27 @@ function CustomersInner() {
   })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Clientes</h1>
-          <p className="text-sm text-muted-foreground">{total} clientes registrados</p>
-        </div>
-        <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo cliente</Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Clientes"
+        description={`${total} clientes registrados`}
+        action={<Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo cliente</Button>}
+      />
 
       <form onSubmit={handleSearch} className="flex gap-2 max-w-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-9 pr-8" placeholder="Buscar nombre, email, teléfono…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
+          <Input className="pl-9 pr-8 rounded-xl" placeholder="Buscar nombre, email, teléfono…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
           {inputQ && (
             <button type="button" onClick={() => { setInputQ(""); navigate({ q: "", page: "1" }) }} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
-        <Button type="submit" variant="outline">Buscar</Button>
+        <Button type="submit" variant="outline" className="rounded-xl">Buscar</Button>
       </form>
 
-      <div className="rounded-md border bg-card">
+      <PageCard noPadding>
         <Table>
           <TableHeader>
             <TableRow>
@@ -190,31 +189,33 @@ function CustomersInner() {
               : customers.length === 0
                 ? <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No hay clientes{q ? ` para "${q}"` : ""}</TableCell></TableRow>
                 : customers.map((c) => (
-                  <TableRow key={c.id}>
+                  <TableRow key={c.id} className="border-border/40 hover:bg-muted/30 transition-colors">
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        {c.isB2B ? <Building2 className="h-4 w-4 text-muted-foreground" /> : <User className="h-4 w-4 text-muted-foreground" />}
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          {c.isB2B ? <Building2 className="h-3.5 w-3.5 text-primary" /> : <User className="h-3.5 w-3.5 text-primary" />}
+                        </div>
                         <div>
-                          <p className="font-medium">{c.name}</p>
+                          <p className="font-medium text-sm">{c.name}</p>
                           {c.companyName && <p className="text-xs text-muted-foreground">{c.companyName}</p>}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        {c.email && <p>{c.email}</p>}
+                      <div className="text-xs">
+                        {c.email && <p className="text-foreground/80">{c.email}</p>}
                         {c.phone && <p className="text-muted-foreground">{c.phone}</p>}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {c.isB2B ? <Badge variant="secondary">B2B</Badge> : <Badge variant="outline">Minorista</Badge>}
+                      {c.isB2B ? <Badge variant="secondary" className="rounded-full text-xs">B2B</Badge> : <Badge variant="outline" className="rounded-full text-xs">Minorista</Badge>}
                     </TableCell>
-                    <TableCell className="text-right">{c.orderCount}</TableCell>
-                    <TableCell className="text-right">${Number(c.totalSpent).toFixed(2)}</TableCell>
+                    <TableCell className="text-right text-sm">{c.orderCount}</TableCell>
+                    <TableCell className="text-right text-sm font-medium">Bs. {Number(c.totalSpent).toFixed(0)}</TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setDeleteId(c.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" onClick={() => openEdit(c)}><Pencil className="h-3.5 w-3.5" /></Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(c.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -222,7 +223,7 @@ function CustomersInner() {
           </TableBody>
         </Table>
         <TablePagination page={page} total={total} limit={LIMIT} />
-      </div>
+      </PageCard>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
@@ -281,18 +282,18 @@ function CustomersInner() {
       </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
             <AlertDialogDescription>Esta acción no se puede deshacer. Los clientes con pedidos no pueden eliminarse.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteId && deleteMutation.mutate(deleteId)}>Eliminar</AlertDialogAction>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl" onClick={() => deleteId && deleteMutation.mutate(deleteId)}>Eliminar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   )
 }
 
