@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TablePagination, SortableHead } from "@/components/ui/data-table-controls"
+import { PageShell, PageHeader, PageCard } from "@/components/admin/page-shell"
 import { DELIVERY_SLOTS } from "@/lib/constants"
 
 type StaffUser = { id: string; name: string; role: string }
@@ -169,13 +170,11 @@ function DeliveryInner() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold font-heading">Entregas</h1>
-          <p className="text-sm text-muted-foreground">{total} entregas registradas</p>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Entregas"
+        description={`${total} entregas registradas`}
+      />
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
@@ -194,7 +193,7 @@ function DeliveryInner() {
               </button>
             )}
           </div>
-          <Button type="submit" variant="outline">Buscar</Button>
+          <Button type="submit" variant="outline" className="rounded-xl">Buscar</Button>
         </form>
 
         <Select value={status} onValueChange={(v) => navigate({ status: v, page: "1" })}>
@@ -220,11 +219,10 @@ function DeliveryInner() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border bg-card">
+      <PageCard noPadding>
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-transparent border-border/50">
               <TableHead>N° Pedido</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Dirección</TableHead>
@@ -243,7 +241,7 @@ function DeliveryInner() {
               : deliveries.length === 0
                 ? <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-10">No hay entregas{q || status !== "ALL" ? " con esos filtros" : ""}</TableCell></TableRow>
                 : deliveries.map((d) => (
-                  <TableRow key={d.id}>
+                  <TableRow key={d.id} className="border-border/40 hover:bg-muted/30 transition-colors">
                     <TableCell className="font-mono text-sm">
                       #{d.order.orderNumber.slice(-8).toUpperCase()}
                     </TableCell>
@@ -260,14 +258,14 @@ function DeliveryInner() {
                     </TableCell>
                     <TableCell className="text-sm">
                       {d.scheduledDate
-                        ? new Date(d.scheduledDate).toLocaleDateString("es-MX", { day: "2-digit", month: "short" })
+                        ? new Date(d.scheduledDate).toLocaleDateString("es-BO", { day: "2-digit", month: "short" })
                         : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {d.slot ? SLOT_MAP[d.slot] ?? d.slot : "—"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[d.status] ?? "outline"}>
+                      <Badge variant={STATUS_VARIANT[d.status] ?? "outline"} className="rounded-full text-xs">
                         {STATUS_LABELS[d.status] ?? d.status}
                       </Badge>
                     </TableCell>
@@ -277,7 +275,7 @@ function DeliveryInner() {
                         : <span className="text-muted-foreground text-sm">Sin asignar</span>}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => openEdit(d)}>
+                      <Button variant="ghost" size="sm" className="rounded-lg text-xs" onClick={() => openEdit(d)}>
                         <Truck className="h-4 w-4 mr-1" />
                         Gestionar
                       </Button>
@@ -287,11 +285,11 @@ function DeliveryInner() {
           </TableBody>
         </Table>
         <TablePagination page={page} total={total} limit={LIMIT} />
-      </div>
+      </PageCard>
 
       {/* Edit / Assign Dialog */}
       <Dialog open={!!editDelivery} onOpenChange={(o) => !o && setEditDelivery(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>
               Gestionar entrega{editDelivery ? ` — #${editDelivery.order.orderNumber.slice(-8).toUpperCase()}` : ""}
@@ -385,7 +383,7 @@ function DeliveryInner() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   )
 }
 

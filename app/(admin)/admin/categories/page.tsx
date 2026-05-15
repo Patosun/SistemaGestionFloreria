@@ -28,6 +28,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { TablePagination, SortableHead } from "@/components/ui/data-table-controls"
+import { PageShell, PageHeader, PageCard } from "@/components/admin/page-shell"
 
 type Category = {
   id: string; name: string; slug: string; description: string | null
@@ -143,34 +144,30 @@ function CategoriesInner() {
   })
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold font-heading">Categorías</h1>
-          <p className="text-sm text-muted-foreground">{total} categorías registradas</p>
-        </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Nueva categoría
-        </Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Categorías"
+        description={`${total} categorías registradas`}
+        action={<Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nueva categoría</Button>}
+      />
 
       <form onSubmit={handleSearch} className="flex gap-2 max-w-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-9 pr-8" placeholder="Buscar categorías…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
+          <Input className="pl-9 pr-8 rounded-xl" placeholder="Buscar categorías…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
           {inputQ && (
             <button type="button" onClick={() => { setInputQ(""); navigate({ q: "", page: "1" }) }} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
-        <Button type="submit" variant="outline">Buscar</Button>
+        <Button type="submit" variant="outline" className="rounded-xl">Buscar</Button>
       </form>
 
-      <div className="rounded-lg border bg-card">
+      <PageCard noPadding>
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-transparent border-border/50">
               <SortableHead column="name" currentSort={sort} currentDir={dir}>Nombre</SortableHead>
               <SortableHead column="slug" currentSort={sort} currentDir={dir}>Slug</SortableHead>
               <TableHead>Productos</TableHead>
@@ -184,17 +181,17 @@ function CategoriesInner() {
                   <TableRow key={i}>{Array.from({ length: 5 }).map((_, j) => <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>)}</TableRow>
                 ))
               : categories.length === 0
-                ? <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">{q ? `Sin resultados para "${q}"` : "Sin categorías. Crea la primera."}</TableCell></TableRow>
+                ? <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-14">{q ? `Sin resultados para "${q}"` : "Sin categorías. Crea la primera."}</TableCell></TableRow>
                 : categories.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.name}</TableCell>
-                    <TableCell className="font-mono text-sm text-muted-foreground">{c.slug}</TableCell>
-                    <TableCell><Badge variant="secondary">{c._count.products}</Badge></TableCell>
-                    <TableCell>{c.sortOrder}</TableCell>
+                  <TableRow key={c.id} className="border-border/40 hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-medium text-sm">{c.name}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{c.slug}</TableCell>
+                    <TableCell><Badge variant="secondary" className="rounded-full text-xs">{c._count.products}</Badge></TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{c.sortOrder}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteId(c.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => openEdit(c)}><Pencil className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(c.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -202,10 +199,10 @@ function CategoriesInner() {
           </TableBody>
         </Table>
         <TablePagination page={page} total={total} limit={LIMIT} />
-      </div>
+      </PageCard>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle>{editCategory ? "Editar categoría" : "Nueva categoría"}</DialogTitle>
           </DialogHeader>
@@ -251,18 +248,18 @@ function CategoriesInner() {
       </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar categoría?</AlertDialogTitle>
             <AlertDialogDescription>Solo se puede eliminar si no tiene productos asignados.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => deleteId && deleteMutation.mutate(deleteId)}>Eliminar</AlertDialogAction>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive hover:bg-destructive/90 rounded-xl" onClick={() => deleteId && deleteMutation.mutate(deleteId)}>Eliminar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   )
 }
 

@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { DELIVERY_SLOTS } from "@/lib/constants"
 import Link from "next/link"
+import { PageShell, PageHeader } from "@/components/admin/page-shell"
 
 const SLOT_MAP: Record<string, string> = Object.fromEntries(
   DELIVERY_SLOTS.map((s) => [s.value, s.label]),
@@ -149,15 +150,12 @@ function CalendarInner() {
   const today = now.getFullYear() === year && now.getMonth() === month ? now.getDate() : null
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold font-heading">Calendario</h1>
-        <p className="text-sm text-muted-foreground">Pedidos y entregas programadas</p>
-      </div>
+    <PageShell>
+      <PageHeader title="Calendario" description="Pedidos y entregas programadas" />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* Calendar grid */}
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b px-4 py-3">
             <Button variant="ghost" size="icon" onClick={prevMonth}>
@@ -249,7 +247,7 @@ function CalendarInner() {
         </div>
 
         {/* Side panel: selected day events */}
-        <div className="rounded-lg border bg-card overflow-y-auto max-h-[600px]">
+        <div className="rounded-2xl border border-border/50 bg-card overflow-y-auto max-h-[600px]">
           <div className="sticky top-0 border-b bg-card px-4 py-3">
             <h3 className="font-medium text-sm">
               {selectedDay
@@ -291,7 +289,7 @@ function CalendarInner() {
                         <span className="text-xs text-muted-foreground">
                           {ev.item.deliverySlot ? SLOT_MAP[ev.item.deliverySlot] ?? ev.item.deliverySlot : "Sin horario"}
                         </span>
-                        <span className="text-xs font-medium">${Number(ev.item.total).toFixed(2)}</span>
+                        <span className="text-xs font-medium">Bs. {Number(ev.item.total).toFixed(0)}</span>
                       </div>
                       {ev.item.delivery && (
                         <div className="pl-5 flex items-center gap-1 text-xs text-muted-foreground">
@@ -325,7 +323,7 @@ function CalendarInner() {
                         <span className="text-xs text-muted-foreground">
                           {ev.item.slot ? SLOT_MAP[ev.item.slot] ?? ev.item.slot : "Sin horario"}
                         </span>
-                        <span className="text-xs font-medium">${Number(ev.item.order.total).toFixed(2)}</span>
+                        <span className="text-xs font-medium">Bs. {Number(ev.item.order.total).toFixed(0)}</span>
                       </div>
                     </>
                   )}
@@ -335,7 +333,7 @@ function CalendarInner() {
           )}
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }
 
