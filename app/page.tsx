@@ -42,7 +42,7 @@ export default function RootPage() {
   return (
     <div className="min-h-screen bg-[#FDF3F6] font-sans selection:bg-[#E6A1B8] selection:text-[#93276F]">
       
-      {/* --- NAVEGACIÓN INTELIGENTE (STICKY) */}
+      {/*  NAVEGACIÓN INTELIGENTE */}
       <nav className={`fixed top-0 w-full z-50 p-6 transition-all duration-300 ${
         isScrolled 
           ? 'bg-[#FDF3F6]/95 backdrop-blur-sm shadow-md' 
@@ -68,7 +68,7 @@ export default function RootPage() {
         </div>
       </nav>
 
-      {/* --- HERO SECTION (OPTIMIZADO) --- */}
+      {/* HERO SECTION (OPTIMIZADO) */}
       <main className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Imagen de Fondo (Rose theme based on palette) */}
         <div className="absolute inset-0 z-0">
@@ -107,7 +107,7 @@ export default function RootPage() {
         </div>
       </main>
 
-      {/* --- SECCIÓN DE FILOSOFÍA: NUESTRO PROCESO (NUEVA) --- */}
+      {/* SECCIÓN DE FILOSOFÍA: NUESTRO PROCESO (NUEVA) */}
       <section id="filosofia" className="py-24 px-6 max-w-7xl mx-auto bg-white/50 rounded-xl mt-12 shadow-sm">
         <div className="text-center mb-16">
           <p className="text-muted-foreground tracking-widest uppercase text-xs">Aleslí • Experiencia</p>
@@ -144,7 +144,7 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* --- SECCIÓN DE CATÁLOGO DINÁMICO --- */}
+      {/* SECCIÓN DE CATÁLOGO DINÁMICO */}
       <section id="catalogo" className="py-24 px-6 max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <p className="text-muted-foreground tracking-widest uppercase text-xs">Descubre Aleslí</p>
@@ -182,46 +182,118 @@ export default function RootPage() {
                 key={item.id} 
                 className="group cursor-pointer"
               >
-                {/* Contenedor de Imagen con Efecto */}
-                <div className="relative aspect-[4/5] overflow-hidden mb-6 bg-[#DFD2E5] rounded-xl shadow-sm border border-[#E6A1B8]/10">
-                  <img 
-                    src={item.image} 
-                    alt={item.name}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                  />
-                  {item.tag && (
-                    <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-tighter font-semibold text-[#93276F] rounded-full shadow-sm">
-                      {item.tag}
-                    </span>
-                  )}
-                  <div className="absolute inset-0 bg-[#93276F]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
+                {/* Envolvemos TODA la tarjeta en el Link dinámico */}
+                <Link href={`/catalogo/${item.id}`} className="block">
+                  
+                  {/* Contenedor de Imagen con Efecto */}
+                  <div className="relative aspect-[4/5] overflow-hidden mb-6 bg-[#DFD2E5] rounded-xl shadow-sm border border-[#E6A1B8]/10">
+                    <img 
+                      src={item.image} 
+                      alt={item.name}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    />
+                    {item.tag && (
+                      <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-tighter font-semibold text-[#93276F] rounded-full shadow-sm z-10">
+                        {item.tag}
+                      </span>
+                    )}
+                    {/* Botón flotante de "Ver Detalles" al pasar el mouse */}
+                    <div className="absolute inset-0 bg-[#93276F]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-0">
+                      <span className="bg-white text-[#93276F] px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
+                        Ver Detalles
+                      </span>
+                    </div>
+                  </div>
 
-                {/* Información del Producto */}
-                <div className="space-y-2 text-center">
-                  <p className="text-[10px] tracking-widest uppercase text-[#E6A1B8] font-bold">{item.category}</p>
-                  <h3 className="text-xl font-serif text-[#93276F] group-hover:text-[#E6A1B8] transition-colors duration-300">
-                    {item.name}
-                  </h3>
-                  <p className="text-[#E6A1B8] font-medium tracking-wider">{item.price}</p>
-                  <div className="w-0 h-px bg-[#E6A1B8] mx-auto group-hover:w-16 transition-all duration-500"></div>
-                </div>
+                  {/* Información del Producto */}
+                  <div className="space-y-2 text-center">
+                    <p className="text-[10px] tracking-widest uppercase text-[#E6A1B8] font-bold">{item.category}</p>
+                    <h3 className="text-xl font-serif text-[#93276F] group-hover:text-[#E6A1B8] transition-colors duration-300">
+                      {item.name}
+                    </h3>
+                    <p className="text-[#E6A1B8] font-medium tracking-wider">{item.price}</p>
+                    <div className="w-0 h-px bg-[#E6A1B8] mx-auto group-hover:w-16 transition-all duration-500"></div>
+                  </div>
+
+                </Link>
               </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>
 
-        {/* Botón de cargar más (Opcional visualmente) */}
+        {/* Botón de cargar más  */}
         {activeCategory === "Todos" && (
           <div className="mt-20 text-center">
-            <button className="border border-[#93276F] text-[#93276F] px-10 py-3 text-xs uppercase tracking-[0.3em] font-medium hover:bg-[#93276F] hover:text-white transition-all duration-300 rounded-md shadow-sm shadow-[#93276F]/10">
+            <Link 
+              href="/catalogo" 
+              className="inline-block border border-[#93276F] text-[#93276F] px-10 py-3 text-xs uppercase tracking-[0.3em] font-medium hover:bg-[#93276F] hover:text-white transition-all duration-300 rounded-md shadow-sm shadow-[#93276F]/10"
+            >
               Cargar Más Arreglos
-            </button>
+            </Link>
           </div>
         )}
       </section>
 
-      {/* --- SECCIÓN DE TESTIMONIOS (ANIMADA) --- */}
+      {/* --- SECCIÓN DE PREGUNTAS FRECUENTES (FAQ) --- */}
+      <section id="faq" className="py-24 px-6 max-w-4xl mx-auto scroll-mt-24">
+        <div className="text-center mb-16">
+          <p className="text-muted-foreground tracking-widest uppercase text-xs">Aleslí • Soporte</p>
+          <h2 className="text-3xl md:text-5xl font-serif mb-4 text-[#93276F]">Preguntas Frecuentes</h2>
+          <div className="w-24 h-px bg-[#E6A1B8] mx-auto"></div>
+        </div>
+        
+        <div className="space-y-4">
+          {[
+            {
+              q: "¿Cuáles son los métodos de pago aceptados en la tienda?",
+              a: "Aceptamos transferencias bancarias, tarjetas de débito y crédito, billeteras móviles y pagos mediante código QR. Además, pensando en tu comodidad, puedes reservar tu pedido con un 50% de anticipo."
+            },
+            {
+              q: "¿Cuánto tiempo tardará en llegar mi pedido?",
+              a: "El tiempo de entrega se adapta a la naturaleza de tu pedido. Los arreglos de nuestro catálogo tradicional pueden entregarse en cuestión de horas, dependiendo de la demanda del día. Para pedidos especiales o personalizados, requerimos unos días de anticipación para garantizar la perfección en cada detalle."
+            },
+            {
+              q: "¿Puedo programar una entrega para una fecha específica?",
+              a: "Por supuesto. Te sugerimos programar tu entrega con anticipación; así nos aseguramos de que tus flores lleguen frescas, hermosas y en el momento exacto para esa ocasión tan especial."
+            },
+            {
+              q: "¿Ofrecen envíos a toda Bolivia?",
+              a: "Sí, realizamos envíos a nivel nacional. Sin embargo, nuestra prioridad es la excelencia. Al tratarse de flores frescas y muy delicadas, te asesoraremos sobre los diseños más resistentes para viajar, minimizando cualquier riesgo durante el trayecto."
+            },
+            {
+              q: "¿Es posible enviar un regalo a una persona cuando no tengo su dirección exacta?",
+              a: "Para garantizar que tu detalle llegue a las manos correctas y en óptimas condiciones, es imprescindible contar con una dirección de entrega exacta y un número de contacto. Esto permite que nuestro equipo logístico brinde el servicio impecable que te mereces."
+            },
+            {
+              q: "¿Puedo incluir una tarjeta con un mensaje personalizado en mi pedido?",
+              a: "Absolutamente. Todo gran detalle floral merece grandes palabras. Podrás enviarnos tu mensaje y nosotros nos encargaremos de transcribirlo en una elegante tarjeta de cortesía que acompañará tu arreglo."
+            },
+            {
+              q: "Quiero hacer un pedido especial pero no se encuentra en su catálogo ¿Es posible?",
+              a: "Nos apasiona crear diseños únicos. Si tienes una visión particular en mente, contáctanos a través de nuestro número de atención para coordinar los detalles y diseñar una obra de arte floral exclusivamente para ti."
+            },
+            {
+              q: "Necesito hacer un pedido corporativo ¿Con quién me puedo contactar?",
+              a: "Estaremos encantados de atender los requerimientos de tu empresa. Por favor, comunícate a nuestra línea de atención (WhatsApp) para recibir asesoramiento corporativo personalizado y cotizaciones preferenciales."
+            }
+          ].map((item, index) => (
+            <details 
+              key={index} 
+              className="group p-5 bg-white/60 backdrop-blur-sm rounded-lg shadow-sm hover:shadow transition-shadow duration-300 cursor-pointer border border-[#E6A1B8]/20"
+            >
+              <summary className="flex gap-4 items-center outline-none list-none [&::-webkit-details-marker]:hidden">
+                <ChevronRight size={18} className="text-[#93276F] transition-transform duration-300 group-open:rotate-90 shrink-0" />
+                <p className="text-sm font-medium text-[#93276F]/90 flex-1">{item.q}</p>
+              </summary>
+              <div className="mt-4 pl-8 pr-4 text-sm text-[#93276F]/70 leading-relaxed border-t border-[#E6A1B8]/20 pt-4 animate-in slide-in-from-top-2 fade-in duration-300">
+                {item.a}
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      {/* SECCIÓN DE TESTIMONIOS  */}
       <motion.section 
         className="py-24 bg-[#DFD2E5] rounded-t-3xl mt-24"
         initial={{ opacity: 0, y: 60 }}
@@ -263,7 +335,9 @@ export default function RootPage() {
             ))}
           </div>
         </div>
-        {/* --- SECCIÓN DE UBICACIÓN (NUEVA) --- */}
+      </motion.section>
+
+      {/* SECCIÓN DE UBICACIÓN  */}
       <section className="py-20 px-6 max-w-7xl mx-auto">
         <div className="bg-gradient-to-br from-[#DFD2E5]/40 to-[#FDF3F6] rounded-3xl p-12 md:p-16 shadow-sm border border-[#E6A1B8]/20 flex flex-col items-center text-center relative overflow-hidden">
           
@@ -290,17 +364,16 @@ export default function RootPage() {
               className="inline-flex items-center gap-3 bg-[#93276F] text-white px-10 py-4 rounded-full text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#7a1f5c] hover:scale-105 transition-all duration-300 shadow-lg shadow-[#93276F]/30 mb-6"
             >
               <MapPin size={18} />
-                Ver en Google Maps
-                
-              {/* Correo agregado aquí */}
+                Ver en Google Maps  
+            </a>
+
+            {/* Correo agregado aquí (fuera del enlace de google maps) */}
             <p className="text-sm text-[#93276F]/70 font-medium">
               Consultas corporativas o especiales: <a href="mailto:floreriaalesli@gmail.com" className="font-bold hover:text-[#E6A1B8] transition-colors border-b border-[#93276F]/20 hover:border-[#E6A1B8]">floreriaalesli@gmail.com</a>
-                </p>    
-            </a>
+            </p> 
           </div>
         </div>
       </section>
-      </motion.section>
 
       {/* --- FOOTER --- */}
       <footer className="bg-[#93276F] text-[#FDF3F6] pt-20 pb-10">
@@ -325,10 +398,11 @@ export default function RootPage() {
             <div>
               <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-[#FDF3F6]">Explorar</h4>
               <ul className="space-y-4 text-sm text-[#FDF3F6]/80">
-                <li><Link href="#catalogo" className="hover:text-white transition-colors">Todas las Flores</Link></li>
-                <li><Link href="#catalogo" className="hover:text-white transition-colors">Bodas</Link></li>
-                <li><Link href="#catalogo" className="hover:text-white transition-colors">Eventos</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Cuidado Floral</Link></li>
+                {/* Ahora todos llevan al catálogo completo real */}
+                <li><Link href="/catalogo" className="hover:text-white transition-colors">Todas las Flores</Link></li>
+                <li><Link href="/catalogo" className="hover:text-white transition-colors">Bodas</Link></li>
+                <li><Link href="/catalogo" className="hover:text-white transition-colors">Eventos</Link></li>
+                {/* Eliminamos "Cuidado Floral" hasta que tengamos una guía escrita */}
               </ul>
             </div>
 
@@ -336,7 +410,7 @@ export default function RootPage() {
             <div>
               <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-white">Atención</h4>
               <ul className="space-y-4 text-sm text-[#FDF3F6]">
-                <li><Link href="#" className="hover:text-white transition-colors">Envíos en La Paz</Link></li>
+                {/* Eliminamos "Envíos" porque el FAQ ya lo explica. Conectamos el FAQ al ID correcto */}
                 <li><Link href="#faq" className="hover:text-white transition-colors">Preguntas Frecuentes</Link></li>
                 <li>
                   <a href="mailto:floreriaalesli@gmail.com" className="hover:text-white transition-colors">
@@ -345,7 +419,6 @@ export default function RootPage() {
                 </li>
               </ul>
             </div>
-
             {/* Columna 4: Newsletter */}
             <div>
               <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-[#FDF3F6]">Newsletter</h4>
