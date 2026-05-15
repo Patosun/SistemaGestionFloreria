@@ -8,6 +8,27 @@ import { Flower, MapPin, Palette, MessageCircle, ChevronRight, Check, Lightbulb 
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Estado para el filtro del catálogo
+  const [activeCategory, setActiveCategory] = useState("Todos");
+
+  // Lista de categorías
+  const categories = ["Todos", "Romance", "Cumpleaños", "Eventos", "Bodas"];
+
+  // Nuestra "Base de Datos" temporal de productos
+  const products = [
+    { id: 1, name: "Susurros de Primavera", price: "245 BOB", image: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=800&auto=format&fit=crop", category: "Romance", tag: "Más Vendido" },
+    { id: 2, name: "Elegancia Imperial", price: "380 BOB", image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=800&auto=format&fit=crop", category: "Eventos", tag: "Nuevo" },
+    { id: 3, name: "Romance en La Paz", price: "190 BOB", image: "https://images.unsplash.com/photo-1591880911020-d344b0b9213a?q=80&w=800&auto=format&fit=crop", category: "Romance", tag: "Exclusivo" },
+    { id: 4, name: "Alegría Radiante", price: "150 BOB", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=800&auto=format&fit=crop", category: "Cumpleaños", tag: "Popular" },
+    { id: 5, name: "Promesa Eterna", price: "450 BOB", image: "https://images.unsplash.com/photo-1508611440040-620e7df663dd?q=80&w=800&auto=format&fit=crop", category: "Bodas", tag: "Premium" },
+    { id: 6, name: "Dulce Atardecer", price: "210 BOB", image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?q=80&w=800&auto=format&fit=crop", category: "Cumpleaños", tag: "" },
+  ];
+
+  // Lógica de filtrado: Si es "Todos", muestra todo, si no, filtra por categoría
+  const filteredProducts = activeCategory === "Todos" 
+    ? products 
+    : products.filter(p => p.category === activeCategory);
 
   // Hook para detectar el scroll (Requirement 2: Smart Navbar)
   useEffect(() => {
@@ -21,7 +42,7 @@ export default function RootPage() {
   return (
     <div className="min-h-screen bg-[#FDF3F6] font-sans selection:bg-[#E6A1B8] selection:text-[#93276F]">
       
-      {/* --- NAVEGACIÓN INTELIGENTE (STICKY) --- */}
+      {/* --- NAVEGACIÓN INTELIGENTE (STICKY) */}
       <nav className={`fixed top-0 w-full z-50 p-6 transition-all duration-300 ${
         isScrolled 
           ? 'bg-[#FDF3F6]/95 backdrop-blur-sm shadow-md' 
@@ -78,10 +99,11 @@ export default function RootPage() {
             />
           </div>
 
-          <button className="relative group overflow-hidden border border-white/50 px-12 py-4 text-xs uppercase tracking-[0.3em] font-medium hover:border-[#E6A1B8] transition-colors duration-500 backdrop-blur-sm bg-black/10">
+          {/* Botón Explorar Colección convertido en Enlace Ancla */}
+          <Link href="#catalogo" className="inline-block relative group overflow-hidden border border-white/50 px-12 py-4 text-xs uppercase tracking-[0.3em] font-medium hover:border-[#E6A1B8] transition-colors duration-500 backdrop-blur-sm bg-black/10">
             <span className="relative z-10 group-hover:text-[#93276F] transition-colors duration-500 font-bold">Explorar Colección</span>
             <div className="absolute inset-0 h-full w-0 bg-[#E6A1B8] transition-all duration-500 ease-out group-hover:w-full z-0"></div>
-          </button>
+          </Link>
         </div>
       </main>
 
@@ -122,155 +144,81 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* --- SECCIÓN DE COLECCIONES DESTACADAS (ANIMADA) --- */}
-      <motion.section 
-        id="catalogo" 
-        className="py-24 px-6 max-w-7xl mx-auto"
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-serif mb-4 text-[#93276F]">Colecciones de Temporada</h2>
+      {/* --- SECCIÓN DE CATÁLOGO DINÁMICO --- */}
+      <section id="catalogo" className="py-24 px-6 max-w-7xl mx-auto">
+        <div className="text-center mb-10">
+          <p className="text-muted-foreground tracking-widest uppercase text-xs">Descubre Aleslí</p>
+          <h2 className="text-3xl md:text-5xl font-serif mb-4 text-[#93276F]">Catálogo Floral</h2>
           <div className="w-24 h-px bg-[#E6A1B8] mx-auto mb-6"></div>
-          <p className="text-muted-foreground tracking-widest uppercase text-xs">Arreglos exclusivos diseñados a mano</p>
         </div>
 
-        {/* Grilla de Productos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-          {[
-            {
-              id: 1,
-              name: "Susurros de Primavera",
-              price: "245 BOB",
-              image: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=800&auto=format&fit=crop",
-              tag: "Más Vendido"
-            },
-            {
-              id: 2,
-              name: "Elegancia Imperial",
-              price: "380 BOB",
-              image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=800&auto=format&fit=crop",
-              tag: "Nuevo"
-            },
-            {
-              id: 3,
-              name: "Romance en la Paz",
-              price: "190 BOB",
-              image: "https://images.unsplash.com/photo-1591880911020-d344b0b9213a?q=80&w=800&auto=format&fit=crop",
-              tag: "Exclusivo"
-            }
-          ].map((item) => (
-            <div key={item.id} className="group cursor-pointer">
-              {/* Contenedor de Imagen con Efecto */}
-              <div className="relative aspect-[4/5] overflow-hidden mb-6 bg-[#DFD2E5] rounded-md shadow-inner">
-                <img 
-                  src={item.image} 
-                  alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                />
-                <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-tighter font-semibold text-[#93276F] rounded-full">
-                  {item.tag}
-                </span>
-                <div className="absolute inset-0 bg-[#93276F]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-
-              {/* Información del Producto */}
-              <div className="space-y-1 text-center">
-                <h3 className="text-xl font-serif text-[#93276F] group-hover:text-[#E6A1B8] transition-colors duration-300">
-                  {item.name}
-                </h3>
-                <p className="text-[#E6A1B8] font-medium tracking-wider">{item.price}</p>
-                <div className="w-0 h-px bg-[#E6A1B8] mx-auto group-hover:w-16 transition-all duration-500"></div>
-              </div>
-            </div>
+        {/* Botones de Subcatálogos (Filtros) */}
+        <div className="flex flex-wrap justify-center gap-3 mb-16">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-6 py-2 rounded-full text-xs uppercase tracking-widest font-semibold transition-all duration-300 border ${
+                activeCategory === cat
+                  ? "bg-[#93276F] text-white border-[#93276F] shadow-md"
+                  : "bg-transparent text-[#93276F] border-[#E6A1B8]/50 hover:border-[#93276F]"
+              }`}
+            >
+              {cat}
+            </button>
           ))}
         </div>
 
-        <div className="mt-20 text-center">
-          <button className="border border-[#93276F] text-[#93276F] px-10 py-3 text-xs uppercase tracking-[0.3em] font-medium hover:bg-[#93276F] hover:text-white transition-all duration-300 rounded-md shadow-sm shadow-[#93276F]/10">
-            Explorar Catálogo Completo
-          </button>
-        </div>
-      </motion.section>
-
-      {/* --- SECCIÓN DE PREGUNTAS FRECUENTES (FAQ) (NUEVA: Inspirada en image_26.png) --- */}
-      <section id="faq" className="py-24 px-6 max-w-7xl mx-auto mt-12 bg-white/60 rounded-xl shadow-inner border border-[#E6A1B8]/10">
-        <div className="text-center mb-16">
-          <p className="text-muted-foreground tracking-widest uppercase text-xs">Ayuda • Aleslí</p>
-          <h2 className="text-3xl md:text-5xl font-serif mb-4 text-[#93276F]">Preguntas Frecuentes</h2>
-          <div className="w-24 h-px bg-[#E6A1B8] mx-auto mb-6"></div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-[2fr,3fr] gap-12 items-start">
-          {/* Ilustración Branded con Puro Código (Lucide + Tailwind) */}
-          <div className="relative p-10 bg-gradient-to-br from-[#DFD2E5] to-[#FDF3F6] rounded-3xl shadow-lg border border-[#E6A1B8]/30 flex flex-col items-center justify-center gap-8 overflow-hidden min-h-[350px]">
-            {/* Círculos decorativos de luz (Efecto Glassmorphism) */}
-            <div className="absolute -top-12 -right-12 w-48 h-48 bg-[#E6A1B8]/30 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-[#93276F]/10 rounded-full blur-3xl"></div>
-
-            {/* Ícono gigante centrado */}
-            <div className="relative z-10 bg-white/60 backdrop-blur-md p-8 rounded-full shadow-inner border border-white/80 transition-transform duration-700 hover:scale-110 hover:rotate-3">
-              <Lightbulb size={90} strokeWidth={1} className="text-[#93276F] drop-shadow-md" />
-            </div>
-
-            <p className="text-xs tracking-widest text-[#93276F] uppercase font-bold bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-sm relative z-10 border border-[#E6A1B8]/20">
-              Resolvemos tus dudas
-            </p>
-          </div>
-
-          {/* Lista de Preguntas Interactivas (Acordeón) */}
-          <div className="space-y-4">
-            {[
-              {
-                q: "¿Cuáles son los métodos de pago aceptados en la tienda?",
-                a: "Aceptamos transferencias bancarias, tarjetas de débito y crédito, billeteras móviles y pagos mediante código QR. Además, pensando en tu comodidad, puedes reservar tu pedido con un 50% de anticipo."
-              },
-              {
-                q: "¿Cuánto tiempo tardará en llegar mi pedido?",
-                a: "El tiempo de entrega se adapta a la naturaleza de tu pedido. Los arreglos de nuestro catálogo tradicional pueden entregarse en cuestión de horas, dependiendo de la demanda del día. Para pedidos especiales o personalizados, requerimos unos días de anticipación para garantizar la perfección en cada detalle."
-              },
-              {
-                q: "¿Puedo programar una entrega para una fecha específica?",
-                a: "Por supuesto. Te sugerimos programar tu entrega con anticipación; así nos aseguramos de que tus flores lleguen frescas, hermosas y en el momento exacto para esa ocasión tan especial."
-              },
-              {
-                q: "¿Ofrecen envíos a toda Bolivia?",
-                a: "Sí, realizamos envíos a nivel nacional. Sin embargo, nuestra prioridad es la excelencia. Al tratarse de flores frescas y muy delicadas, te asesoraremos sobre los diseños más resistentes para viajar, minimizando cualquier riesgo durante el trayecto."
-              },
-              {
-                q: "¿Es posible enviar un regalo a una persona cuando no tengo su dirección exacta?",
-                a: "Para garantizar que tu detalle llegue a las manos correctas y en óptimas condiciones, es imprescindible contar con una dirección de entrega exacta y un número de contacto. Esto permite que nuestro equipo logístico brinde el servicio impecable que te mereces."
-              },
-              {
-                q: "¿Puedo incluir una tarjeta con un mensaje personalizado en mi pedido?",
-                a: "Absolutamente. Todo gran detalle floral merece grandes palabras. Podrás enviarnos tu mensaje y nosotros nos encargaremos de transcribirlo en una elegante tarjeta de cortesía que acompañará tu arreglo."
-              },
-              {
-                q: "Quiero hacer un pedido especial pero no se encuentra en su catálogo ¿Es posible?",
-                a: "Nos apasiona crear diseños únicos. Si tienes una visión particular en mente, contáctanos a través de nuestro número de atención para coordinar los detalles y diseñar una obra de arte floral exclusivamente para ti."
-              },
-              {
-                q: "Necesito hacer un pedido corporativo ¿Con quién me puedo contactar?",
-                a: "Estaremos encantados de atender los requerimientos de tu empresa. Por favor, comunícate a nuestra línea de atención (WhatsApp) para recibir asesoramiento corporativo personalizado y cotizaciones preferenciales."
-              }
-            ].map((item, index) => (
-              <details 
-                key={index} 
-                className="group p-5 bg-white rounded-lg shadow-sm hover:shadow transition-shadow duration-300 cursor-pointer border border-[#E6A1B8]/10"
+        {/* Grilla de Productos Filtrados con Animación */}
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 min-h-[500px]">
+          <AnimatePresence mode="popLayout">
+            {filteredProducts.map((item) => (
+              <motion.div 
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.4 }}
+                key={item.id} 
+                className="group cursor-pointer"
               >
-                <summary className="flex gap-4 items-center outline-none list-none [&::-webkit-details-marker]:hidden">
-                  <ChevronRight size={18} className="text-[#93276F] transition-transform duration-300 group-open:rotate-90" />
-                  <p className="text-sm font-medium text-[#93276F]/90 flex-1">{item.q}</p>
-                </summary>
-                <div className="mt-4 pl-8 pr-4 text-sm text-[#93276F]/70 leading-relaxed border-t border-[#E6A1B8]/20 pt-4 animate-in slide-in-from-top-2 fade-in duration-300">
-                  {item.a}
+                {/* Contenedor de Imagen con Efecto */}
+                <div className="relative aspect-[4/5] overflow-hidden mb-6 bg-[#DFD2E5] rounded-xl shadow-sm border border-[#E6A1B8]/10">
+                  <img 
+                    src={item.image} 
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                  />
+                  {item.tag && (
+                    <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-tighter font-semibold text-[#93276F] rounded-full shadow-sm">
+                      {item.tag}
+                    </span>
+                  )}
+                  <div className="absolute inset-0 bg-[#93276F]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-              </details>
+
+                {/* Información del Producto */}
+                <div className="space-y-2 text-center">
+                  <p className="text-[10px] tracking-widest uppercase text-[#E6A1B8] font-bold">{item.category}</p>
+                  <h3 className="text-xl font-serif text-[#93276F] group-hover:text-[#E6A1B8] transition-colors duration-300">
+                    {item.name}
+                  </h3>
+                  <p className="text-[#E6A1B8] font-medium tracking-wider">{item.price}</p>
+                  <div className="w-0 h-px bg-[#E6A1B8] mx-auto group-hover:w-16 transition-all duration-500"></div>
+                </div>
+              </motion.div>
             ))}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Botón de cargar más (Opcional visualmente) */}
+        {activeCategory === "Todos" && (
+          <div className="mt-20 text-center">
+            <button className="border border-[#93276F] text-[#93276F] px-10 py-3 text-xs uppercase tracking-[0.3em] font-medium hover:bg-[#93276F] hover:text-white transition-all duration-300 rounded-md shadow-sm shadow-[#93276F]/10">
+              Cargar Más Arreglos
+            </button>
           </div>
-        </div>
+        )}
       </section>
 
       {/* --- SECCIÓN DE TESTIMONIOS (ANIMADA) --- */}
@@ -336,13 +284,18 @@ export default function RootPage() {
             </p>
             
             <a 
-              href="https://maps.app.goo.gl/R4bkp9eHhYobzrPR6" 
+              href="https://l.facebook.com/l.php?u=https%3A%2F%2Fwww.bing.com%2Fmaps%2Fdefault.aspx%3Fv%3D2%26pc%3DFACEBK%26mid%3D8100%26where1%3DCalle%2520Campos%2520No.%2520248%252C%2520entre%2520Av.%25206%2520de%2520Agosto%2520y%2520Av.%2520Arce%252C%2520La%2520Paz%252C%2520Bolivia%26FORM%3DFBKPL1%26mkt%3Des-MX%26fbclid%3DIwZXh0bgNhZW0CMTAAYnJpZBExTGRvVHg0MUJsclBHdjJDTnNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR4ZIcPKFZ2SOoSotvOSo7AUv-BadyXma31nmZ8EX04h6gK5Jm7O-Wdq_thxcA_aem_s0YH5h2_p5tCLR9BW-1Wjg&h=AUDz4ljVcrMgEKbxYKh0KgmfpeHNo9H8DgZf7SouK2k1yt0-bRCARlPvWdLbDMPFs3x5i8GA_Wst-WTlHK6j0A2kWHxpR3z2PqkZVYzf3A7hmIph7uv-zLsxcRkvMgwuD-_W" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 bg-[#93276F] text-white px-10 py-4 rounded-full text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#7a1f5c] hover:scale-105 transition-all duration-300 shadow-lg shadow-[#93276F]/30"
+              className="inline-flex items-center gap-3 bg-[#93276F] text-white px-10 py-4 rounded-full text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#7a1f5c] hover:scale-105 transition-all duration-300 shadow-lg shadow-[#93276F]/30 mb-6"
             >
               <MapPin size={18} />
-              Ver en Google Maps
+                Ver en Google Maps
+                
+              {/* Correo agregado aquí */}
+            <p className="text-sm text-[#93276F]/70 font-medium">
+              Consultas corporativas o especiales: <a href="mailto:floreriaalesli@gmail.com" className="font-bold hover:text-[#E6A1B8] transition-colors border-b border-[#93276F]/20 hover:border-[#E6A1B8]">floreriaalesli@gmail.com</a>
+                </p>    
             </a>
           </div>
         </div>
@@ -381,11 +334,15 @@ export default function RootPage() {
 
             {/* Columna 3: Soporte */}
             <div>
-              <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-[#FDF3F6]">Atención</h4>
-              <ul className="space-y-4 text-sm text-[#FDF3F6]/80">
+              <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-white">Atención</h4>
+              <ul className="space-y-4 text-sm text-[#FDF3F6]">
                 <li><Link href="#" className="hover:text-white transition-colors">Envíos en La Paz</Link></li>
                 <li><Link href="#faq" className="hover:text-white transition-colors">Preguntas Frecuentes</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Contacto</Link></li>
+                <li>
+                  <a href="mailto:floreriaalesli@gmail.com" className="hover:text-white transition-colors">
+                    floreriaalesli@gmail.com
+                  </a>
+                </li>
               </ul>
             </div>
 
