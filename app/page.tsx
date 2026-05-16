@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flower, MapPin, Palette, MessageCircle, ChevronRight, Check, Lightbulb } from 'lucide-react';
 import { LandingCatalogSection } from "@/components/landing/catalog-section";
- 
+
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   

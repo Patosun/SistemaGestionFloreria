@@ -27,6 +27,7 @@ type Product = {
   id: string; sku: string; name: string; slug: string
   description?: string | null; categoryId?: string | null
   isPublic: boolean; isSeasonal: boolean; freshnessDays: number | null
+  images: string[]; tags: string[]
   category: Category | null; variants: Variant[]; _count: { variants: number }
 }
 

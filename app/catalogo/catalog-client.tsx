@@ -1,50 +1,21 @@
-import { db } from "@/lib/db"
-import { CatalogClient } from "./catalog-client"
+"use client";
 
-export type CatalogProduct = {
-  id: string
-  name: string
-  price: string
-  image: string | null
-  category: string
-  description: string
+import { useState } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, Search } from "lucide-react";
+import type { CatalogProduct } from "./page";
+
+interface CatalogClientProps {
+  products: CatalogProduct[];
+  categories: string[];
 }
 
-export default async function CatalogoPage() {
-  const dbProducts = await db.product.findMany({
-    where: { isPublic: true },
-    include: {
-      category: { select: { id: true, name: true } },
-      variants: {
-        where: { isActive: true },
-        orderBy: { price: "asc" },
-        take: 1,
-        select: { price: true },
-      },
-    },
-    orderBy: { name: "asc" },
-  })
+export function CatalogClient({ products, categories }: CatalogClientProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState("Todos");
 
-  const products: CatalogProduct[] = dbProducts.map((p) => ({
-    id: p.slug,
-    name: p.name,
-    price: p.variants[0] ? `${Number(p.variants[0].price).toFixed(0)} BOB` : "Consultar",
-    image: p.images[0] ?? null,
-    category: p.category?.name ?? "General",
-    description: p.description ?? "",
-  }))
-
-  const categorySet = new Set(products.map((p) => p.category))
-  const categories = ["Todos", ...Array.from(categorySet).sort()]
-
-  return <CatalogClient products={products} categories={categories} />
-}
-
-<<<<<<< HEAD
-  const categories = ["Todos", "Romance", "Cumpleaños", "Bodas", "Eventos"];
-
-  // Lógica de filtrado doble (Categoría + Búsqueda)
-  const filteredProducts = fullInventory.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const matchesCategory = activeCategory === "Todos" || product.category === activeCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -95,7 +66,7 @@ export default async function CatalogoPage() {
               >
                 {cat}
               </button>
-            ))} 
+            ))}
           </div>
         </div>
 
@@ -112,14 +83,18 @@ export default async function CatalogoPage() {
                 key={product.id}
                 className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-[#E6A1B8]/10"
               >
-                {/* Imagen del Producto ahora es un LINK a la página dinámica */}
                 <Link href={`/catalogo/${product.id}`} className="block relative aspect-square overflow-hidden bg-[#DFD2E5] cursor-pointer">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  {/* Etiqueta flotante de "Ver detalles" */}
+                  {product.image ? (
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[#DFD2E5]">
+                      <span className="text-[#93276F]/30 text-6xl font-serif">✿</span>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-[#93276F]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <span className="bg-white text-[#93276F] px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform">
                       Ver Detalles
@@ -151,7 +126,7 @@ export default async function CatalogoPage() {
           <div className="py-20 text-center">
             <p className="text-lg italic opacity-50">No encontramos arreglos que coincidan con tu búsqueda...</p>
             <button 
-              onClick={() => {setSearchTerm(""); setActiveCategory("Todos")}}
+              onClick={() => { setSearchTerm(""); setActiveCategory("Todos") }}
               className="mt-6 text-[#93276F] font-bold underline underline-offset-4"
             >
               Ver todo el catálogo
@@ -160,12 +135,9 @@ export default async function CatalogoPage() {
         )}
       </main>
 
-      {/* --- BOTÓN FLOTANTE DE REGRESO --- */}
       <footer className="py-10 text-center text-[10px] tracking-[0.2em] uppercase opacity-40">
         © 2026 ALESLÍ DISEÑO FLORAL • LA PAZ, BOLIVIA
       </footer>
     </div>
   );
 }
-=======
->>>>>>> 1f5a727d85fd44937bc96c484efc0bb762c6431f
