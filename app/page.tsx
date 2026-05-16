@@ -5,31 +5,11 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flower, MapPin, Palette, MessageCircle, ChevronRight, Check, Lightbulb } from 'lucide-react';
+import { LandingCatalogSection } from "@/components/landing/catalog-section";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // Estado para el filtro del catálogo
-  const [activeCategory, setActiveCategory] = useState("Todos");
-
-  // Lista de categorías
-  const categories = ["Todos", "Romance", "Cumpleaños", "Eventos", "Bodas"];
-
-  // Nuestra "Base de Datos" temporal de productos
-  const products = [
-    { id: 1, name: "Susurros de Primavera", price: "245 BOB", image: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=800&auto=format&fit=crop", category: "Romance", tag: "Más Vendido" },
-    { id: 2, name: "Elegancia Imperial", price: "380 BOB", image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=800&auto=format&fit=crop", category: "Eventos", tag: "Nuevo" },
-    { id: 3, name: "Romance en La Paz", price: "190 BOB", image: "https://images.unsplash.com/photo-1591880911020-d344b0b9213a?q=80&w=800&auto=format&fit=crop", category: "Romance", tag: "Exclusivo" },
-    { id: 4, name: "Alegría Radiante", price: "150 BOB", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=800&auto=format&fit=crop", category: "Cumpleaños", tag: "Popular" },
-    { id: 5, name: "Promesa Eterna", price: "450 BOB", image: "https://images.unsplash.com/photo-1508611440040-620e7df663dd?q=80&w=800&auto=format&fit=crop", category: "Bodas", tag: "Premium" },
-    { id: 6, name: "Dulce Atardecer", price: "210 BOB", image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?q=80&w=800&auto=format&fit=crop", category: "Cumpleaños", tag: "" },
-  ];
-
-  // Lógica de filtrado: Si es "Todos", muestra todo, si no, filtra por categoría
-  const filteredProducts = activeCategory === "Todos" 
-    ? products 
-    : products.filter(p => p.category === activeCategory);
-
   // Hook para detectar el scroll (Requirement 2: Smart Navbar)
   useEffect(() => {
     const handleScroll = () => {
@@ -144,95 +124,7 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* SECCIÓN DE CATÁLOGO DINÁMICO */}
-      <section id="catalogo" className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-muted-foreground tracking-widest uppercase text-xs">Descubre Aleslí</p>
-          <h2 className="text-3xl md:text-5xl font-serif mb-4 text-[#93276F]">Catálogo Floral</h2>
-          <div className="w-24 h-px bg-[#E6A1B8] mx-auto mb-6"></div>
-        </div>
-
-        {/* Botones de Subcatálogos (Filtros) */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2 rounded-full text-xs uppercase tracking-widest font-semibold transition-all duration-300 border ${
-                activeCategory === cat
-                  ? "bg-[#93276F] text-white border-[#93276F] shadow-md"
-                  : "bg-transparent text-[#93276F] border-[#E6A1B8]/50 hover:border-[#93276F]"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Grilla de Productos Filtrados con Animación */}
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 min-h-[500px]">
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.map((item) => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-                key={item.id} 
-                className="group cursor-pointer"
-              >
-                {/* Envolvemos TODA la tarjeta en el Link dinámico */}
-                <Link href={`/catalogo/${item.id}`} className="block">
-                  
-                  {/* Contenedor de Imagen con Efecto */}
-                  <div className="relative aspect-[4/5] overflow-hidden mb-6 bg-[#DFD2E5] rounded-xl shadow-sm border border-[#E6A1B8]/10">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                    />
-                    {item.tag && (
-                      <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-tighter font-semibold text-[#93276F] rounded-full shadow-sm z-10">
-                        {item.tag}
-                      </span>
-                    )}
-                    {/* Botón flotante de "Ver Detalles" al pasar el mouse */}
-                    <div className="absolute inset-0 bg-[#93276F]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-0">
-                      <span className="bg-white text-[#93276F] px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
-                        Ver Detalles
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Información del Producto */}
-                  <div className="space-y-2 text-center">
-                    <p className="text-[10px] tracking-widest uppercase text-[#E6A1B8] font-bold">{item.category}</p>
-                    <h3 className="text-xl font-serif text-[#93276F] group-hover:text-[#E6A1B8] transition-colors duration-300">
-                      {item.name}
-                    </h3>
-                    <p className="text-[#E6A1B8] font-medium tracking-wider">{item.price}</p>
-                    <div className="w-0 h-px bg-[#E6A1B8] mx-auto group-hover:w-16 transition-all duration-500"></div>
-                  </div>
-
-                </Link>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Botón de cargar más  */}
-        {activeCategory === "Todos" && (
-          <div className="mt-20 text-center">
-            <Link 
-              href="/catalogo" 
-              className="inline-block border border-[#93276F] text-[#93276F] px-10 py-3 text-xs uppercase tracking-[0.3em] font-medium hover:bg-[#93276F] hover:text-white transition-all duration-300 rounded-md shadow-sm shadow-[#93276F]/10"
-            >
-              Cargar Más Arreglos
-            </Link>
-          </div>
-        )}
-      </section>
+      <LandingCatalogSection />
 
       {/* --- SECCIÓN DE PREGUNTAS FRECUENTES (FAQ) --- */}
       <section id="faq" className="py-24 px-6 max-w-4xl mx-auto scroll-mt-24">
