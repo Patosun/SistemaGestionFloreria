@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ShoppingCart, Plus, Minus, Trash2, ArrowRight, ShoppingBag } from "lucide-react"
 import { useCartStore } from "@/lib/cart-store"
+import { useStoreModals } from "@/lib/store-modals"
+import { useSession } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useEffect } from "react"
@@ -12,6 +14,17 @@ const EMOJIS = ["🌹", "💐", "🌸", "🌺", "🪷", "🌷", "🌻", "🌼"]
 export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, totalItems } =
     useCartStore()
+  const { openAuth, openCheckout } = useStoreModals()
+  const { data: session } = useSession()
+
+  function handleCheckout() {
+    closeCart()
+    if (!session) {
+      openAuth("checkout")
+    } else {
+      openCheckout()
+    }
+  }
 
   const total = subtotal()
   const count = totalItems()
@@ -178,20 +191,14 @@ export function CartDrawer() {
                   Envío calculado según zona en La Paz.
                 </p>
 
-                {/* Checkout via WhatsApp */}
+                {/* Checkout */}
                 <Button
-                  asChild
                   size="lg"
                   className="w-full rounded-full gap-2 shadow-lg shadow-primary/20 mt-1"
+                  onClick={handleCheckout}
                 >
-                  <a
-                    href={buildWhatsAppUrl(items, total)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Finalizar por WhatsApp
-                    <ArrowRight className="h-4 w-4" />
-                  </a>
+                  {session ? "Confirmar pedido" : "Ingresar para pedir"}
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
 
                 <Button
@@ -201,7 +208,7 @@ export function CartDrawer() {
                   onClick={closeCart}
                   asChild
                 >
-                  <Link href="/store/productos">Seguir comprando</Link>
+                  <Link href="/catalogo">Seguir comprando</Link>
                 </Button>
               </motion.div>
             )}
@@ -212,19 +219,3 @@ export function CartDrawer() {
   )
 }
 
-function buildWhatsAppUrl(items: { name: string; variantName: string; quantity: number; price: number }[], total: number): string {
-  const lines = items.map(
-    (i) => `• ${i.name} (${i.variantName}) x${i.quantity} = Bs. ${(i.price * i.quantity).toFixed(0)}`
-  )
-  const msg = [
-    "Hola! Me gustaría hacer el siguiente pedido:",
-    "",
-    ...lines,
-    "",
-    `*Total: Bs. ${total.toFixed(0)}*`,
-    "",
-    "¿Pueden confirmar disponibilidad y datos de entrega en La Paz?",
-  ].join("\n")
-
-  return `https://wa.me/59121234567?text=${encodeURIComponent(msg)}`
-}

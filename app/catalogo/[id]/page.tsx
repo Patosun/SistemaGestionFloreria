@@ -16,7 +16,7 @@ export default async function ProductDetailPage({
       variants: {
         where: { isActive: true },
         orderBy: { price: "asc" },
-        select: { price: true },
+        select: { id: true, name: true, price: true },
       },
     },
   })
@@ -43,6 +43,9 @@ export default async function ProductDetailPage({
 
   const product: DetailProduct = {
     id: dbProduct.slug,
+    productId: dbProduct.id,
+    variantId: dbProduct.variants[0]?.id ?? "",
+    variantName: dbProduct.variants[0]?.name ?? "Estándar",
     name: dbProduct.name,
     price: dbProduct.variants[0] ? Number(dbProduct.variants[0].price) : 0,
     image: dbProduct.images[0] ?? null,

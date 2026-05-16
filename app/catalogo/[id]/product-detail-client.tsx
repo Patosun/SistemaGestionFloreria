@@ -4,9 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Minus, Plus, ShoppingBag, MessageCircle, Heart, Share2, X, Link2, Check } from "lucide-react";
+import { useCartStore } from "@/lib/cart-store";
+import { useSession } from "@/lib/auth-client";
+import { useStoreModals } from "@/lib/store-modals";
 
 export type DetailProduct = {
   id: string;
+  productId: string;
+  variantId: string;
+  variantName: string;
   name: string;
   price: number;
   image: string | null;
@@ -34,10 +40,37 @@ export function ProductDetailClient({ product, relatedProducts }: ProductDetailC
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const { addItem, openCart } = useCartStore();
+  const { data: session } = useSession();
+  const { openAuth } = useStoreModals();
 
   useEffect(() => {
     setCurrentUrl(window.location.href);
   }, []);
+
+  function handleAddToCart() {
+    if (!session) {
+      openAuth();
+      return;
+    }
+    const EMOJIS = ["🌹", "💐", "🌸", "🌺", "🪷", "🌷", "🌻", "🌼"];
+    addItem({
+      id: `${product.productId}-${product.variantId}`,
+      productId: product.productId,
+      variantId: product.variantId,
+      name: product.name,
+      variantName: product.variantName,
+      price: product.price,
+      quantity,
+      image: product.image,
+      emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+    });
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
+    openCart();
+  }
 
   const handleShare = async () => {
     const shareData = {
@@ -176,8 +209,12 @@ export function ProductDetailClient({ product, relatedProducts }: ProductDetailC
                 </button>
               </div>
 
-              <button className="flex-1 bg-[#93276F] text-white rounded-full flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-xs hover:bg-[#7a1f5c] transition-colors shadow-lg shadow-[#93276F]/30 py-3">
-                <ShoppingBag size={18} /> Añadir al carrito
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-[#93276F] text-white rounded-full flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-xs hover:bg-[#7a1f5c] transition-colors shadow-lg shadow-[#93276F]/30 py-3"
+              >
+                <ShoppingBag size={18} />
+                {addedToCart ? "¡Agregado!" : session ? "Añadir al carrito" : "Ingresar para pedir"}
               </button>
             </div>
 

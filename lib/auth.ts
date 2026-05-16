@@ -1,14 +1,33 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
 import { db } from "@/lib/db"
+import { sendVerificationEmail } from "@/lib/email"
 
 export const auth = betterAuth({
   database: prismaAdapter(db, { provider: "postgresql" }),
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: false, // no bloquea login – verificación es recomendada
   },
+
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail(user.email, url)
+    },
+    autoSignInAfterVerification: true,
+  },
+
+  ...(process.env["GOOGLE_CLIENT_ID"]
+    ? {
+        socialProviders: {
+          google: {
+            clientId: process.env["GOOGLE_CLIENT_ID"] as string,
+            clientSecret: process.env["GOOGLE_CLIENT_SECRET"] as string,
+          },
+        },
+      }
+    : {}),
 
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 días
@@ -24,8 +43,8 @@ export const auth = betterAuth({
       role: {
         type: "string",
         required: true,
-        defaultValue: "CASHIER",
-        input: false, // no editable por el usuario desde el cliente
+        defaultValue: "CUSTOMER", // auto-registro = cliente
+        input: false,
       },
       isActive: {
         type: "boolean",

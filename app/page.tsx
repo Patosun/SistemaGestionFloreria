@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flower, MapPin, Palette, MessageCircle, ChevronRight, Check, Lightbulb } from 'lucide-react';
 import { LandingCatalogSection } from "@/components/landing/catalog-section";
+import { CustomerShell } from "@/components/store/customer-shell";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -407,8 +408,7 @@ export default function RootPage() {
           z-index: -1;
         }
       `}</style>
-      <div className="fixed bottom-6 right-6 z-40 p-4 rounded-full w-[60px] h-[60px] pulse-ALESLI pointer-events-none"></div>
-
+      <CustomerShell />
     </div>
   );
 }
