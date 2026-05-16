@@ -5,31 +5,11 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flower, MapPin, Palette, MessageCircle, ChevronRight, Check, Lightbulb } from 'lucide-react';
-
+import { LandingCatalogSection } from "@/components/landing/catalog-section";
+ 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // Estado para el filtro del catálogo
-  const [activeCategory, setActiveCategory] = useState("Todos");
-
-  // Lista de categorías
-  const categories = ["Todos", "Romance", "Cumpleaños", "Eventos", "Bodas"];
-
-  // Nuestra "Base de Datos" temporal de productos
-  const products = [
-    { id: 1, name: "Susurros de Primavera", price: "245 BOB", image: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=800&auto=format&fit=crop", category: "Romance", tag: "Más Vendido" },
-    { id: 2, name: "Elegancia Imperial", price: "380 BOB", image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=800&auto=format&fit=crop", category: "Eventos", tag: "Nuevo" },
-    { id: 3, name: "Romance en La Paz", price: "190 BOB", image: "https://images.unsplash.com/photo-1591880911020-d344b0b9213a?q=80&w=800&auto=format&fit=crop", category: "Romance", tag: "Exclusivo" },
-    { id: 4, name: "Alegría Radiante", price: "150 BOB", image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=800&auto=format&fit=crop", category: "Cumpleaños", tag: "Popular" },
-    { id: 5, name: "Promesa Eterna", price: "450 BOB", image: "https://images.unsplash.com/photo-1508611440040-620e7df663dd?q=80&w=800&auto=format&fit=crop", category: "Bodas", tag: "Premium" },
-    { id: 6, name: "Dulce Atardecer", price: "210 BOB", image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?q=80&w=800&auto=format&fit=crop", category: "Cumpleaños", tag: "" },
-  ];
-
-  // Lógica de filtrado: Si es "Todos", muestra todo, si no, filtra por categoría
-  const filteredProducts = activeCategory === "Todos" 
-    ? products 
-    : products.filter(p => p.category === activeCategory);
-
   // Hook para detectar el scroll (Requirement 2: Smart Navbar)
   useEffect(() => {
     const handleScroll = () => {
@@ -42,69 +22,33 @@ export default function RootPage() {
   return (
     <div className="min-h-screen bg-[#FDF3F6] font-sans selection:bg-[#E6A1B8] selection:text-[#93276F]">
       
-      {/* --- NAVEGACIÓN INTELIGENTE (SIMPLIFICADA Y PEQUEÑA) --- */}
-<nav className={`fixed top-0 w-full z-50 px-4 py-3 transition-all duration-300 ${
-  isScrolled 
-    ? 'bg-white/95 backdrop-blur-sm shadow-sm' 
-    : 'bg-gradient-to-b from-[#FDF3F6]/90 to-transparent'
-}`}>
-  <div className="max-w-7xl mx-auto flex justify-between items-center">
-    
-    {/* Logo - Más pequeño */}
-    <div className={`transition-all duration-300 ${isScrolled ? '' : 'brightness-0 invert'}`}>
-      <Image 
-        src="/assets/Logo.png" 
-        alt="Aleslí Logo" 
-        width={90} 
-        height={28} 
-        priority
-      />
-    </div>
+      {/*  NAVEGACIÓN INTELIGENTE */}
+      <nav className={`fixed top-0 w-full z-50 p-6 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-[#FDF3F6]/95 backdrop-blur-sm shadow-md' 
+          : 'bg-gradient-to-b from-black/50 to-transparent'
+      }`}>
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className={`transition-all duration-300 ${isScrolled ? 'brightness-100 invert-0' : 'brightness-0 invert'}`}>
+            <Image 
+              src="/assets/Logo.png" // Ajusta la ruta si es necesario
+              alt="Aleslí Logo" 
+              width={100} 
+              height={33} 
+              priority
+            />
+          </div>
+          <div className={`hidden md:flex gap-8 text-sm tracking-widest uppercase font-medium transition-colors duration-300 ${
+            isScrolled ? 'text-[#93276F]' : 'text-white/90'
+          }`}>
+            <Link href="#catalogo" className="hover:text-[#E6A1B8] transition-colors">Catálogo</Link>
+            <Link href="#filosofia" className="hover:text-[#E6A1B8] transition-colors">Nosotros</Link>
+            <Link href="#faq" className="hover:text-[#E6A1B8] transition-colors">Ayuda</Link>
+          </div>
+        </div>
+      </nav>
 
-    {/* Desktop Menu + Botón Login */}
-    <div className="hidden md:flex items-center gap-6">
-      {/* Menú simple */}
-      <div className="flex gap-6 text-xs uppercase font-medium tracking-wider">
-        <Link href="#catalogo" className={`hover:text-[#E6A1B8] transition-colors py-1 ${
-          isScrolled ? 'text-[#93276F]' : 'text-white/90'
-        }`}>
-          Catálogo
-        </Link>
-        <Link href="#filosofia" className={`hover:text-[#E6A1B8] transition-colors py-1 ${
-          isScrolled ? 'text-[#93276F]' : 'text-white/90'
-        }`}>
-          Nosotros
-        </Link>
-        <Link href="#faq" className={`hover:text-[#E6A1B8] transition-colors py-1 ${
-          isScrolled ? 'text-[#93276F]' : 'text-white/90'
-        }`}>
-          Ayuda
-        </Link>
-      </div>
-
-      {/* Botón Iniciar Sesión - Compacto */}
-      <Link 
-        href="/login"
-        className={`px-4 py-2 text-xs uppercase font-semibold tracking-wide rounded-full transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-[#93276F] text-white hover:bg-[#7a1f5c] shadow-sm' 
-            : 'bg-white/20 text-white border border-white/30 hover:bg-white/40'
-        }`}
-      >
-        Iniciar Sesión
-      </Link>
-    </div>
-
-    {/* Mobile Button */}
-    <button className="md:hidden p-1 rounded">
-      <svg className={`w-5 h-5 ${isScrolled ? 'text-[#93276F]' : 'text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-  </div>
-</nav>
-
-      {/* --- HERO SECTION (OPTIMIZADO) --- */}
+      {/* HERO SECTION (OPTIMIZADO) */}
       <main className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Imagen de Fondo (Rose theme based on palette) */}
         <div className="absolute inset-0 z-0">
@@ -143,7 +87,7 @@ export default function RootPage() {
         </div>
       </main>
 
-      {/* --- SECCIÓN DE FILOSOFÍA: NUESTRO PROCESO (NUEVA) --- */}
+      {/* SECCIÓN DE FILOSOFÍA: NUESTRO PROCESO (NUEVA) */}
       <section id="filosofia" className="py-24 px-6 max-w-7xl mx-auto bg-white/50 rounded-xl mt-12 shadow-sm">
         <div className="text-center mb-16">
           <p className="text-muted-foreground tracking-widest uppercase text-xs">Aleslí • Experiencia</p>
@@ -180,84 +124,68 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* --- SECCIÓN DE CATÁLOGO DINÁMICO --- */}
-      <section id="catalogo" className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-muted-foreground tracking-widest uppercase text-xs">Descubre Aleslí</p>
-          <h2 className="text-3xl md:text-5xl font-serif mb-4 text-[#93276F]">Catálogo Floral</h2>
-          <div className="w-24 h-px bg-[#E6A1B8] mx-auto mb-6"></div>
-        </div>
+      <LandingCatalogSection />
 
-        {/* Botones de Subcatálogos (Filtros) */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2 rounded-full text-xs uppercase tracking-widest font-semibold transition-all duration-300 border ${
-                activeCategory === cat
-                  ? "bg-[#93276F] text-white border-[#93276F] shadow-md"
-                  : "bg-transparent text-[#93276F] border-[#E6A1B8]/50 hover:border-[#93276F]"
-              }`}
+      {/* --- SECCIÓN DE PREGUNTAS FRECUENTES (FAQ) --- */}
+      <section id="faq" className="py-24 px-6 max-w-4xl mx-auto scroll-mt-24">
+        <div className="text-center mb-16">
+          <p className="text-muted-foreground tracking-widest uppercase text-xs">Aleslí • Soporte</p>
+          <h2 className="text-3xl md:text-5xl font-serif mb-4 text-[#93276F]">Preguntas Frecuentes</h2>
+          <div className="w-24 h-px bg-[#E6A1B8] mx-auto"></div>
+        </div>
+        
+        <div className="space-y-4">
+          {[
+            {
+              q: "¿Cuáles son los métodos de pago aceptados en la tienda?",
+              a: "Aceptamos transferencias bancarias, tarjetas de débito y crédito, billeteras móviles y pagos mediante código QR. Además, pensando en tu comodidad, puedes reservar tu pedido con un 50% de anticipo."
+            },
+            {
+              q: "¿Cuánto tiempo tardará en llegar mi pedido?",
+              a: "El tiempo de entrega se adapta a la naturaleza de tu pedido. Los arreglos de nuestro catálogo tradicional pueden entregarse en cuestión de horas, dependiendo de la demanda del día. Para pedidos especiales o personalizados, requerimos unos días de anticipación para garantizar la perfección en cada detalle."
+            },
+            {
+              q: "¿Puedo programar una entrega para una fecha específica?",
+              a: "Por supuesto. Te sugerimos programar tu entrega con anticipación; así nos aseguramos de que tus flores lleguen frescas, hermosas y en el momento exacto para esa ocasión tan especial."
+            },
+            {
+              q: "¿Ofrecen envíos a toda Bolivia?",
+              a: "Sí, realizamos envíos a nivel nacional. Sin embargo, nuestra prioridad es la excelencia. Al tratarse de flores frescas y muy delicadas, te asesoraremos sobre los diseños más resistentes para viajar, minimizando cualquier riesgo durante el trayecto."
+            },
+            {
+              q: "¿Es posible enviar un regalo a una persona cuando no tengo su dirección exacta?",
+              a: "Para garantizar que tu detalle llegue a las manos correctas y en óptimas condiciones, es imprescindible contar con una dirección de entrega exacta y un número de contacto. Esto permite que nuestro equipo logístico brinde el servicio impecable que te mereces."
+            },
+            {
+              q: "¿Puedo incluir una tarjeta con un mensaje personalizado en mi pedido?",
+              a: "Absolutamente. Todo gran detalle floral merece grandes palabras. Podrás enviarnos tu mensaje y nosotros nos encargaremos de transcribirlo en una elegante tarjeta de cortesía que acompañará tu arreglo."
+            },
+            {
+              q: "Quiero hacer un pedido especial pero no se encuentra en su catálogo ¿Es posible?",
+              a: "Nos apasiona crear diseños únicos. Si tienes una visión particular en mente, contáctanos a través de nuestro número de atención para coordinar los detalles y diseñar una obra de arte floral exclusivamente para ti."
+            },
+            {
+              q: "Necesito hacer un pedido corporativo ¿Con quién me puedo contactar?",
+              a: "Estaremos encantados de atender los requerimientos de tu empresa. Por favor, comunícate a nuestra línea de atención (WhatsApp) para recibir asesoramiento corporativo personalizado y cotizaciones preferenciales."
+            }
+          ].map((item, index) => (
+            <details 
+              key={index} 
+              className="group p-5 bg-white/60 backdrop-blur-sm rounded-lg shadow-sm hover:shadow transition-shadow duration-300 cursor-pointer border border-[#E6A1B8]/20"
             >
-              {cat}
-            </button>
+              <summary className="flex gap-4 items-center outline-none list-none [&::-webkit-details-marker]:hidden">
+                <ChevronRight size={18} className="text-[#93276F] transition-transform duration-300 group-open:rotate-90 shrink-0" />
+                <p className="text-sm font-medium text-[#93276F]/90 flex-1">{item.q}</p>
+              </summary>
+              <div className="mt-4 pl-8 pr-4 text-sm text-[#93276F]/70 leading-relaxed border-t border-[#E6A1B8]/20 pt-4 animate-in slide-in-from-top-2 fade-in duration-300">
+                {item.a}
+              </div>
+            </details>
           ))}
         </div>
-
-        {/* Grilla de Productos Filtrados con Animación */}
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 min-h-[500px]">
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.map((item) => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-                key={item.id} 
-                className="group cursor-pointer"
-              >
-                {/* Contenedor de Imagen con Efecto */}
-                <div className="relative aspect-[4/5] overflow-hidden mb-6 bg-[#DFD2E5] rounded-xl shadow-sm border border-[#E6A1B8]/10">
-                  <img 
-                    src={item.image} 
-                    alt={item.name}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                  />
-                  {item.tag && (
-                    <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-tighter font-semibold text-[#93276F] rounded-full shadow-sm">
-                      {item.tag}
-                    </span>
-                  )}
-                  <div className="absolute inset-0 bg-[#93276F]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-
-                {/* Información del Producto */}
-                <div className="space-y-2 text-center">
-                  <p className="text-[10px] tracking-widest uppercase text-[#E6A1B8] font-bold">{item.category}</p>
-                  <h3 className="text-xl font-serif text-[#93276F] group-hover:text-[#E6A1B8] transition-colors duration-300">
-                    {item.name}
-                  </h3>
-                  <p className="text-[#E6A1B8] font-medium tracking-wider">{item.price}</p>
-                  <div className="w-0 h-px bg-[#E6A1B8] mx-auto group-hover:w-16 transition-all duration-500"></div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Botón de cargar más (Opcional visualmente) */}
-        {activeCategory === "Todos" && (
-          <div className="mt-20 text-center">
-            <button className="border border-[#93276F] text-[#93276F] px-10 py-3 text-xs uppercase tracking-[0.3em] font-medium hover:bg-[#93276F] hover:text-white transition-all duration-300 rounded-md shadow-sm shadow-[#93276F]/10">
-              Cargar Más Arreglos
-            </button>
-          </div>
-        )}
       </section>
 
-      {/* --- SECCIÓN DE TESTIMONIOS (ANIMADA) --- */}
+      {/* SECCIÓN DE TESTIMONIOS  */}
       <motion.section 
         className="py-24 bg-[#DFD2E5] rounded-t-3xl mt-24"
         initial={{ opacity: 0, y: 60 }}
@@ -299,7 +227,9 @@ export default function RootPage() {
             ))}
           </div>
         </div>
-        {/* --- SECCIÓN DE UBICACIÓN (NUEVA) --- */}
+      </motion.section>
+
+      {/* SECCIÓN DE UBICACIÓN  */}
       <section className="py-20 px-6 max-w-7xl mx-auto">
         <div className="bg-gradient-to-br from-[#DFD2E5]/40 to-[#FDF3F6] rounded-3xl p-12 md:p-16 shadow-sm border border-[#E6A1B8]/20 flex flex-col items-center text-center relative overflow-hidden">
           
@@ -326,17 +256,16 @@ export default function RootPage() {
               className="inline-flex items-center gap-3 bg-[#93276F] text-white px-10 py-4 rounded-full text-xs uppercase tracking-[0.2em] font-bold hover:bg-[#7a1f5c] hover:scale-105 transition-all duration-300 shadow-lg shadow-[#93276F]/30 mb-6"
             >
               <MapPin size={18} />
-                Ver en Google Maps
-                
-              {/* Correo agregado aquí */}
+                Ver en Google Maps  
+            </a>
+
+            {/* Correo agregado aquí (fuera del enlace de google maps) */}
             <p className="text-sm text-[#93276F]/70 font-medium">
               Consultas corporativas o especiales: <a href="mailto:floreriaalesli@gmail.com" className="font-bold hover:text-[#E6A1B8] transition-colors border-b border-[#93276F]/20 hover:border-[#E6A1B8]">floreriaalesli@gmail.com</a>
-                </p>    
-            </a>
+            </p> 
           </div>
         </div>
       </section>
-      </motion.section>
 
       {/* --- FOOTER --- */}
       <footer className="bg-[#93276F] text-[#FDF3F6] pt-20 pb-10">
@@ -361,10 +290,11 @@ export default function RootPage() {
             <div>
               <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-[#FDF3F6]">Explorar</h4>
               <ul className="space-y-4 text-sm text-[#FDF3F6]/80">
-                <li><Link href="#catalogo" className="hover:text-white transition-colors">Todas las Flores</Link></li>
-                <li><Link href="#catalogo" className="hover:text-white transition-colors">Bodas</Link></li>
-                <li><Link href="#catalogo" className="hover:text-white transition-colors">Eventos</Link></li>
-                <li><Link href="#" className="hover:text-white transition-colors">Cuidado Floral</Link></li>
+                {/* Ahora todos llevan al catálogo completo real */}
+                <li><Link href="/catalogo" className="hover:text-white transition-colors">Todas las Flores</Link></li>
+                <li><Link href="/catalogo" className="hover:text-white transition-colors">Bodas</Link></li>
+                <li><Link href="/catalogo" className="hover:text-white transition-colors">Eventos</Link></li>
+                {/* Eliminamos "Cuidado Floral" hasta que tengamos una guía escrita */}
               </ul>
             </div>
 
@@ -372,7 +302,7 @@ export default function RootPage() {
             <div>
               <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-white">Atención</h4>
               <ul className="space-y-4 text-sm text-[#FDF3F6]">
-                <li><Link href="#" className="hover:text-white transition-colors">Envíos en La Paz</Link></li>
+                {/* Eliminamos "Envíos" porque el FAQ ya lo explica. Conectamos el FAQ al ID correcto */}
                 <li><Link href="#faq" className="hover:text-white transition-colors">Preguntas Frecuentes</Link></li>
                 <li>
                   <a href="mailto:floreriaalesli@gmail.com" className="hover:text-white transition-colors">
@@ -381,7 +311,6 @@ export default function RootPage() {
                 </li>
               </ul>
             </div>
-
             {/* Columna 4: Newsletter */}
             <div>
               <h4 className="text-xs uppercase tracking-[0.2em] font-bold mb-6 text-[#FDF3F6]">Newsletter</h4>

@@ -36,9 +36,7 @@ const NAV_GROUPS = [
     label: "Catálogo",
     items: [
       { href: "/admin/products",   label: "Productos",     icon: Package },
-      { href: "/admin/categories", label: "Categorías",    icon: ClipboardList },
       { href: "/admin/inventory",  label: "Inventario",    icon: FlowerIcon },
-      { href: "/admin/suppliers",  label: "Proveedores",   icon: Truck },
     ],
   },
   {
