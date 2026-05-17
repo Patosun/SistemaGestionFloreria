@@ -19,6 +19,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProductDialog } from "@/components/products/product-dialog"
 import { TablePagination, SortableHead } from "@/components/ui/data-table-controls"
+import { PageShell, PageHeader, PageCard } from "@/components/admin/page-shell"
 
 type Variant = { id: string; sku: string; name: string; price: string; costPrice: string }
 type Category = { id: string; name: string }
@@ -26,6 +27,7 @@ type Product = {
   id: string; sku: string; name: string; slug: string
   description?: string | null; categoryId?: string | null
   isPublic: boolean; isSeasonal: boolean; freshnessDays: number | null
+  images: string[]; tags: string[]
   category: Category | null; variants: Variant[]; _count: { variants: number }
 }
 
@@ -93,22 +95,22 @@ function ProductsInner() {
   })
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold font-heading">Productos</h1>
-          <p className="text-sm text-muted-foreground">{total} productos en el catálogo</p>
-        </div>
-        <Button onClick={() => { setEditProduct(null); setDialogOpen(true) }}>
-          <Plus className="mr-2 h-4 w-4" /> Nuevo producto
-        </Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Productos"
+        description={`${total} productos en el catálogo`}
+        action={
+          <Button onClick={() => { setEditProduct(null); setDialogOpen(true) }}>
+            <Plus className="mr-2 h-4 w-4" /> Nuevo producto
+          </Button>
+        }
+      />
 
       <form onSubmit={handleSearch} className="flex gap-2 max-w-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            className="pl-9 pr-8"
+            className="pl-9 pr-8 rounded-xl"
             placeholder="Buscar por nombre o SKU…"
             value={inputQ}
             onChange={(e) => setInputQ(e.target.value)}
@@ -119,13 +121,13 @@ function ProductsInner() {
             </button>
           )}
         </div>
-        <Button type="submit" variant="outline">Buscar</Button>
+        <Button type="submit" variant="outline" className="rounded-xl">Buscar</Button>
       </form>
 
-      <div className="rounded-lg border bg-card">
+      <PageCard noPadding>
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-transparent border-border/50">
               <SortableHead column="sku" currentSort={sort} currentDir={dir}>SKU</SortableHead>
               <SortableHead column="name" currentSort={sort} currentDir={dir}>Nombre</SortableHead>
               <TableHead>Categoría</TableHead>
@@ -147,35 +149,37 @@ function ProductsInner() {
               : products.length === 0
                 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
-                      {q ? `Sin resultados para "${q}"` : "No hay productos"}
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-14">
+                      {q ? `Sin resultados para "${q}"` : "No hay productos aún"}
                     </TableCell>
                   </TableRow>
                 )
                 : products.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-mono text-sm">{p.sku}</TableCell>
+                  <TableRow key={p.id} className="border-border/40 hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-mono text-xs text-muted-foreground">{p.sku}</TableCell>
                     <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell>{p.category?.name ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell><Badge variant="secondary">{p._count.variants}</Badge></TableCell>
+                    <TableCell className="text-sm">{p.category?.name ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell><Badge variant="secondary" className="rounded-full">{p._count.variants}</Badge></TableCell>
                     <TableCell>
                       {p.freshnessDays
-                        ? <span className="text-sm">{p.freshnessDays} días</span>
+                        ? <span className="text-sm">{p.freshnessDays}d</span>
                         : <span className="text-muted-foreground text-sm">—</span>}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        {p.isPublic ? <Badge>Público</Badge> : <Badge variant="outline">Interno</Badge>}
-                        {p.isSeasonal && <Badge variant="secondary">Temporada</Badge>}
+                        {p.isPublic
+                          ? <Badge className="rounded-full text-xs">Público</Badge>
+                          : <Badge variant="outline" className="rounded-full text-xs">Interno</Badge>}
+                        {p.isSeasonal && <Badge variant="secondary" className="rounded-full text-xs">Temporada</Badge>}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => { setEditProduct(p); setDialogOpen(true) }}>
-                          <Pencil className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => { setEditProduct(p); setDialogOpen(true) }}>
+                          <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteId(p.id)}>
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(p.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </TableCell>
@@ -184,7 +188,7 @@ function ProductsInner() {
           </TableBody>
         </Table>
         <TablePagination page={page} total={total} limit={LIMIT} />
-      </div>
+      </PageCard>
 
       <ProductDialog
         open={dialogOpen}
@@ -194,15 +198,15 @@ function ProductsInner() {
       />
 
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
             <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 rounded-xl"
               onClick={() => deleteId && deleteMutation.mutate(deleteId)}
             >
               Eliminar
@@ -210,7 +214,7 @@ function ProductsInner() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   )
 }
 

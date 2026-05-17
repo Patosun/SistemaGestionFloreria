@@ -6,11 +6,12 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
 import { z } from "zod"
 import { toast } from "sonner"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { ImageUploader } from "@/components/products/image-uploader"
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,8 @@ type Product = {
   freshnessDays?: number | null
   isSeasonal: boolean
   isPublic: boolean
+  images: string[]
+  tags: string[]
   variants: Variant[]
 }
 
@@ -73,6 +76,8 @@ const formSchema = z.object({
   freshnessDays: z.number().int().positive().optional().or(z.literal("")),
   isSeasonal: z.enum(["true", "false"]),
   isPublic: z.enum(["true", "false"]),
+  images: z.array(z.string()),
+  tags: z.array(z.string()),
   variants: z.array(variantSchema).min(1, "Al menos una variante"),
 })
 
@@ -91,6 +96,7 @@ interface ProductDialogProps {
 
 export function ProductDialog({ open, onOpenChange, product, onSuccess }: ProductDialogProps) {
   const isEdit = !!product
+  const [tagInput, setTagInput] = useState("")
 
   const { data: categoriesData } = useQuery<{ data: Category[] }>({
     queryKey: ["categories"],
@@ -109,6 +115,8 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess }: Produc
       freshnessDays: "",
       isSeasonal: "false",
       isPublic: "true",
+      images: [],
+      tags: [],
       variants: [{ sku: "", name: "Estándar", price: 0, costPrice: 0 }],
     },
   })
@@ -118,6 +126,7 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess }: Produc
   // Fill form when editing
   useEffect(() => {
     if (open) {
+      setTagInput("")
       if (product) {
         form.reset({
           sku: product.sku,
@@ -128,6 +137,8 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess }: Produc
           freshnessDays: product.freshnessDays ?? "",
           isSeasonal: product.isSeasonal ? "true" : "false",
           isPublic: product.isPublic ? "true" : "false",
+          images: product.images ?? [],
+          tags: product.tags ?? [],
           variants: product.variants.map((v) => ({
             sku: v.sku,
             name: v.name,
@@ -145,6 +156,8 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess }: Produc
           freshnessDays: "",
           isSeasonal: "false",
           isPublic: "true",
+          images: [],
+          tags: [],
           variants: [{ sku: "", name: "Estándar", price: 0, costPrice: 0 }],
         })
       }
@@ -177,6 +190,8 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess }: Produc
         freshnessDays: values.freshnessDays ? Number(values.freshnessDays) : undefined,
         isSeasonal: values.isSeasonal === "true",
         isPublic: values.isPublic === "true",
+        images: values.images,
+        tags: values.tags,
         variants: values.variants.map((v) => ({
           ...v,
           isActive: true,
@@ -186,8 +201,7 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess }: Produc
       const url = isEdit ? `/api/v1/products/${product!.id}` : "/api/v1/products"
       const method = isEdit ? "PATCH" : "POST"
       const body = isEdit
-        ? // PATCH only sends product-level fields (no variants for now)
-          { ...payload, variants: undefined }
+        ? { ...payload, variants: undefined }
         : payload
 
       const res = await fetch(url, {
@@ -361,6 +375,87 @@ export function ProductDialog({ open, onOpenChange, product, onSuccess }: Produc
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <Textarea rows={3} placeholder="Descripción del producto..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Images */}
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Imágenes del producto</FormLabel>
+                  <FormControl>
+                    <ImageUploader value={field.value} onChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Tags */}
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Etiquetas</FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ej: romántico, rosa, primavera"
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === ",") {
+                              e.preventDefault()
+                              const tag = tagInput.trim().toLowerCase()
+                              if (tag && !field.value.includes(tag)) {
+                                field.onChange([...field.value, tag])
+                              }
+                              setTagInput("")
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const tag = tagInput.trim().toLowerCase()
+                            if (tag && !field.value.includes(tag)) {
+                              field.onChange([...field.value, tag])
+                            }
+                            setTagInput("")
+                          }}
+                        >
+                          Agregar
+                        </Button>
+                      </div>
+                      {field.value.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {field.value.map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium"
+                            >
+                              {tag}
+                              <button
+                                type="button"
+                                onClick={() => field.onChange(field.value.filter((t) => t !== tag))}
+                                className="text-muted-foreground hover:text-foreground"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

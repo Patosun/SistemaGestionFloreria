@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TablePagination, SortableHead } from "@/components/ui/data-table-controls"
+import { PageShell, PageHeader, PageCard } from "@/components/admin/page-shell"
 
 type Order = {
   id: string; orderNumber: string; channel: string; status: string
@@ -115,31 +116,29 @@ function OrdersInner() {
   })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Pedidos</h1>
-          <p className="text-sm text-muted-foreground">{total} pedidos totales</p>
-        </div>
-        <Link href="/pos"><Button>Nueva venta (POS)</Button></Link>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Pedidos"
+        description={`${total} pedidos totales`}
+        action={<Link href="/pos"><Button>Nueva venta (POS)</Button></Link>}
+      />
 
       <div className="flex gap-3 flex-wrap">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-9 pr-8 w-64" placeholder="Buscar N° pedido, cliente…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
+            <Input className="pl-9 pr-8 w-64 rounded-xl" placeholder="Buscar N° pedido, cliente…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
             {inputQ && (
               <button type="button" onClick={() => { setInputQ(""); navigate({ q: "", page: "1" }) }} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
-          <Button type="submit" variant="outline">Buscar</Button>
+          <Button type="submit" variant="outline" className="rounded-xl">Buscar</Button>
         </form>
 
         <Select value={status} onValueChange={(v) => navigate({ status: v, page: "1" })}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Estado" /></SelectTrigger>
+          <SelectTrigger className="w-44 rounded-xl"><SelectValue placeholder="Estado" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">Todos los estados</SelectItem>
             {Object.entries(STATUS_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
@@ -147,7 +146,7 @@ function OrdersInner() {
         </Select>
 
         <Select value={channel} onValueChange={(v) => navigate({ channel: v, page: "1" })}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Canal" /></SelectTrigger>
+          <SelectTrigger className="w-40 rounded-xl"><SelectValue placeholder="Canal" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">Todos los canales</SelectItem>
             {Object.entries(CHANNEL_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
@@ -155,7 +154,7 @@ function OrdersInner() {
         </Select>
       </div>
 
-      <div className="rounded-md border bg-card">
+      <PageCard noPadding>
         <Table>
           <TableHeader>
             <TableRow>
@@ -177,23 +176,23 @@ function OrdersInner() {
               : orders.length === 0
                 ? <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No hay pedidos{q || status !== "ALL" ? " con esos filtros" : ""}</TableCell></TableRow>
                 : orders.map((o) => (
-                  <TableRow key={o.id}>
-                    <TableCell className="font-mono text-sm">#{o.orderNumber.slice(-8).toUpperCase()}</TableCell>
+                  <TableRow key={o.id} className="border-border/40 hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-mono text-xs text-muted-foreground">#{o.orderNumber.slice(-8).toUpperCase()}</TableCell>
                     <TableCell>
                       {o.customer
-                        ? <div><p className="font-medium">{o.customer.name}</p>{o.customer.phone && <p className="text-xs text-muted-foreground">{o.customer.phone}</p>}</div>
+                        ? <div><p className="font-medium text-sm">{o.customer.name}</p>{o.customer.phone && <p className="text-xs text-muted-foreground">{o.customer.phone}</p>}</div>
                         : <span className="text-muted-foreground text-sm">Sin cliente</span>}
                     </TableCell>
-                    <TableCell><Badge variant="outline">{CHANNEL_LABELS[o.channel] ?? o.channel}</Badge></TableCell>
-                    <TableCell><Badge variant={STATUS_VARIANT[o.status] ?? "outline"}>{STATUS_LABELS[o.status] ?? o.status}</Badge></TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{o.items.length} {o.items.length === 1 ? "producto" : "productos"}</TableCell>
-                    <TableCell className="text-right font-medium">${Number(o.total).toFixed(2)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{new Date(o.createdAt).toLocaleDateString("es-MX")}</TableCell>
+                    <TableCell><Badge variant="outline" className="rounded-full text-xs">{CHANNEL_LABELS[o.channel] ?? o.channel}</Badge></TableCell>
+                    <TableCell><Badge variant={STATUS_VARIANT[o.status] ?? "outline"} className="rounded-full text-xs">{STATUS_LABELS[o.status] ?? o.status}</Badge></TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{o.items.length} {o.items.length === 1 ? "prod." : "prods."}</TableCell>
+                    <TableCell className="text-right font-semibold text-sm">Bs. {Number(o.total).toFixed(0)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleDateString("es-BO")}</TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Link href={`/admin/orders/${o.id}`}><Button size="icon" variant="ghost"><Eye className="h-4 w-4" /></Button></Link>
+                        <Link href={`/admin/orders/${o.id}`}><Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg"><Eye className="h-3.5 w-3.5" /></Button></Link>
                         {!["CANCELED", "REFUNDED", "DELIVERED"].includes(o.status) && (
-                          <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setCancelId(o.id)}><XCircle className="h-4 w-4" /></Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => setCancelId(o.id)}><XCircle className="h-3.5 w-3.5" /></Button>
                         )}
                       </div>
                     </TableCell>
@@ -202,21 +201,21 @@ function OrdersInner() {
           </TableBody>
         </Table>
         <TablePagination page={page} total={total} limit={LIMIT} />
-      </div>
+      </PageCard>
 
       <AlertDialog open={!!cancelId} onOpenChange={(o) => !o && setCancelId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Cancelar pedido?</AlertDialogTitle>
             <AlertDialogDescription>El pedido será marcado como Cancelado. Esta acción no libera inventario automáticamente.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, volver</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => cancelId && cancelMutation.mutate(cancelId)}>Cancelar pedido</AlertDialogAction>
+            <AlertDialogCancel className="rounded-xl">No, volver</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl" onClick={() => cancelId && cancelMutation.mutate(cancelId)}>Cancelar pedido</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   )
 }
 

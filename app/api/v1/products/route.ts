@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
         category: { select: { id: true, name: true } },
         variants: {
           where: { isActive: true },
-          select: { id: true, sku: true, name: true, price: true, costPrice: true },
+          select: { id: true, sku: true, name: true, price: true, costPrice: true, isActive: true },
         },
         _count: { select: { variants: true } },
       },

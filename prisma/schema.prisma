@@ -694,8 +694,8 @@ model CompanySetting {
   email     String?
   address   String?
   city      String?
-  currency  String   @default("MXN")
-  timezone  String   @default("America/Mexico_City")
+  currency  String   @default("BOB")
+  timezone  String   @default("America/La_Paz")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

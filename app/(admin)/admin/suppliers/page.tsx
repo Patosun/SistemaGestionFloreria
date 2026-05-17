@@ -31,6 +31,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { TablePagination, SortableHead } from "@/components/ui/data-table-controls"
+import { PageShell, PageHeader, PageCard } from "@/components/admin/page-shell"
 
 type Supplier = {
   id: string; name: string; contactName: string | null; email: string | null
@@ -142,34 +143,30 @@ function SuppliersInner() {
   })
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold font-heading">Proveedores</h1>
-          <p className="text-sm text-muted-foreground">{total} proveedores registrados</p>
-        </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Nuevo proveedor
-        </Button>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Proveedores"
+        description={`${total} proveedores registrados`}
+        action={<Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo proveedor</Button>}
+      />
 
       <form onSubmit={handleSearch} className="flex gap-2 max-w-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-9 pr-8" placeholder="Buscar proveedores…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
+          <Input className="pl-9 pr-8 rounded-xl" placeholder="Buscar proveedores…" value={inputQ} onChange={(e) => setInputQ(e.target.value)} />
           {inputQ && (
             <button type="button" onClick={() => { setInputQ(""); navigate({ q: "", page: "1" }) }} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
-        <Button type="submit" variant="outline">Buscar</Button>
+        <Button type="submit" variant="outline" className="rounded-xl">Buscar</Button>
       </form>
 
-      <div className="rounded-lg border bg-card">
+      <PageCard noPadding>
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-transparent border-border/50">
               <SortableHead column="name" currentSort={sort} currentDir={dir}>Nombre</SortableHead>
               <SortableHead column="contactName" currentSort={sort} currentDir={dir}>Contacto</SortableHead>
               <SortableHead column="email" currentSort={sort} currentDir={dir}>Email</SortableHead>
@@ -185,23 +182,23 @@ function SuppliersInner() {
                   <TableRow key={i}>{Array.from({ length: 7 }).map((_, j) => <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>)}</TableRow>
                 ))
               : suppliers.length === 0
-                ? <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-10">{q ? `Sin resultados para "${q}"` : "Sin proveedores. Agrega el primero."}</TableCell></TableRow>
+                ? <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-14">{q ? `Sin resultados para "${q}"` : "Sin proveedores. Agrega el primero."}</TableCell></TableRow>
                 : suppliers.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell className="font-medium">{s.name}</TableCell>
-                    <TableCell>{s.contactName ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="text-sm">{s.email ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="text-sm">{s.phone ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell><Badge variant="secondary">{s._count.lots}</Badge></TableCell>
+                  <TableRow key={s.id} className="border-border/40 hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-medium text-sm">{s.name}</TableCell>
+                    <TableCell className="text-sm">{s.contactName ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{s.email ?? <span>—</span>}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{s.phone ?? <span>—</span>}</TableCell>
+                    <TableCell><Badge variant="secondary" className="rounded-full text-xs">{s._count.lots}</Badge></TableCell>
                     <TableCell>
                       {s.isActive
-                        ? <span className="flex items-center gap-1 text-green-600 text-sm"><CheckCircle className="h-4 w-4" />Activo</span>
-                        : <span className="flex items-center gap-1 text-muted-foreground text-sm"><XCircle className="h-4 w-4" />Inactivo</span>}
+                        ? <span className="flex items-center gap-1.5 text-emerald-600 text-xs font-medium"><CheckCircle className="h-3.5 w-3.5" />Activo</span>
+                        : <span className="flex items-center gap-1.5 text-muted-foreground text-xs"><XCircle className="h-3.5 w-3.5" />Inactivo</span>}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteId(s.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => openEdit(s)}><Pencil className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -209,10 +206,10 @@ function SuppliersInner() {
           </TableBody>
         </Table>
         <TablePagination page={page} total={total} limit={LIMIT} />
-      </div>
+      </PageCard>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>{editSupplier ? "Editar proveedor" : "Nuevo proveedor"}</DialogTitle>
           </DialogHeader>
@@ -226,7 +223,7 @@ function SuppliersInner() {
                   <FormItem><FormLabel>Contacto</FormLabel><FormControl><Input placeholder="Juan Pérez" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="phone" render={({ field }) => (
-                  <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input placeholder="+52 55 1234 5678" {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input placeholder="+591 70000000" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
               <FormField control={form.control} name="email" render={({ field }) => (
@@ -258,18 +255,18 @@ function SuppliersInner() {
       </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar proveedor?</AlertDialogTitle>
             <AlertDialogDescription>Solo se puede eliminar si no tiene lotes registrados.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => deleteId && deleteMutation.mutate(deleteId)}>Eliminar</AlertDialogAction>
+            <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive hover:bg-destructive/90 rounded-xl" onClick={() => deleteId && deleteMutation.mutate(deleteId)}>Eliminar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   )
 }
 

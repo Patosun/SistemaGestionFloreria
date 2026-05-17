@@ -259,7 +259,7 @@ export default function PosPage() {
             </div>
           ) : variants.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-muted-foreground">
-              {productQ ? "Sin resultados" : "Escribe para buscar productos"}
+              {"Sin resultados"}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
